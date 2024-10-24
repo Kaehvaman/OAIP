@@ -115,7 +115,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    SystemParametersInfoW(SPI_GETWORKAREA, 0, &workarea, 0);
 
    int cx = ((workarea.right - workarea.left) / 2) - (width / 2);
-   int cy = ((workarea.bottom - workarea.top) / 2)- (height / 2);
+   int cy = ((workarea.bottom - workarea.top) / 2) - (height / 2);
 
    HWND hWnd = CreateWindowExW(WS_EX_COMPOSITED, szWindowClass, szTitle, wstyle,
       cx, cy, width, height, nullptr, nullptr, hInstance, nullptr);
@@ -154,8 +154,8 @@ int map[M][N] = {
     {0, 0, 0, 0, 0,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0}
 };
 
-enum enum_moves { left, right, up, down };
-void movePlayer(enum_moves move) {
+enum enum_ways { left, right, up, down };
+void movePlayer(enum_ways move) {
     switch (move) {
     case left:
         if ((player_x > 0) and map[player_y][player_x - 1] != 2) player_x -= 1;
@@ -176,15 +176,32 @@ void movePlayer(enum_moves move) {
     }
 }
 
-void drawNet(HDC hdc, int width, int height, int step) {
-    for (int i = 0; i <= width; i = i + step) {
+void putElement(enum_ways way, int element) {
+    switch (way) {
+    case left:
+        if ((player_x > 0) and map[player_y][player_x - 1] == 0) map[player_y][player_x - 1] = element;
+        break;
+    case right:
+        if ((player_x < N - 1) and map[player_y][player_x + 1] == 0) map[player_y][player_x + 1] = element;
+        break;
+    case up:
+        if ((player_y > 0) and map[player_y - 1][player_x] == 0) map[player_y - 1][player_x] = element;
+        break;
+    case down:
+        if ((player_y < M - 1) and map[player_y + 1][player_x] == 0) map[player_y + 1][player_x] = element;
+        break;
+    }
+}
+
+void drawNet(HDC hdc) {
+    for (int i = 0; i <= N * WIDTH; i = i + WIDTH) {
         MoveToEx(hdc, i, 0, NULL);
-        LineTo(hdc, i, height);
+        LineTo(hdc, i, M*HEIGHT);
     }
 
-    for (int i = 0; i <= height; i = i + step) {
+    for (int i = 0; i <= M * HEIGHT; i = i + HEIGHT) {
         MoveToEx(hdc, 0, i, NULL);
-        LineTo(hdc, width, i);
+        LineTo(hdc, N * WIDTH, i);
     }
 }
 
@@ -321,12 +338,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Добавьте сюда любой код прорисовки, использующий HDC...
 
-            RECT rect;
-            GetClientRect(hWnd, &rect);
-
             drawMap(hdc);
             drawPlayer(hdc);
-            if (netToggle) drawNet(hdc, rect.right, rect.bottom, 40);
+            if (netToggle) drawNet(hdc);
 
             EndPaint(hWnd, &ps);
         }
@@ -355,6 +369,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case VK_A:
             movePlayer(left);
             break;
+        case VK_L:
+            putElement(right, 2);
         }
         InvalidateRect(hWnd, NULL, FALSE);
         break;

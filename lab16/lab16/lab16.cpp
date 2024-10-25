@@ -154,7 +154,10 @@ int player_x = 1;
 int player_y = 1;
 
 enum obj_enum {empty = 0, wall = 2, gold = 3};
-int inventory[4] = { 0, 0, 0, 0 };
+// TODO: do something with "empty" object
+#define INVENTORY_SIZE 4
+int inventory[INVENTORY_SIZE] = { 0, 0, 15, 0 };
+obj_enum selected_element = gold;
 
 enum enum_ways { left, right, up, down };
 void movePlayer(enum_ways move) {
@@ -172,14 +175,14 @@ void movePlayer(enum_ways move) {
         if ((player_y < M - 1) and map[player_y + 1][player_x] != 2) player_y += 1;
         break;
     }
-    if (map[player_y][player_x] == 3) {
+    if (map[player_y][player_x] == gold) {
         map[player_y][player_x] = 0;
         inventory[gold]++;
     }
 }
 
 void putElement(enum_ways way, obj_enum element) {
-    if (inventory[element] == 0) return;
+    if (element != empty && inventory[element] == 0) return;
 
     switch (way) {
     case left:
@@ -209,8 +212,22 @@ void putElement(enum_ways way, obj_enum element) {
     }
 }
 
-void beam(enum_ways way) {
+void deathbeam(enum_ways way) {
+    for (int i = player_x + 1; i < N; i++) {
+        if (map[player_y][i] != empty) inventory[map[player_y][i]] += 1;
+        map[player_y][i] = 0;
+    }
+}
 
+void stomp(int r) {
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < N; j++) {
+            if ((player_y - r <= i) && (i <= player_y + r) && (player_x - r <= j) && (j <= player_x + r) && map[i][j] == wall) {
+                inventory[wall] += 1;
+                map[i][j] = empty;
+            }
+        }
+    }
 }
 
 void drawNet(HDC hdc) {
@@ -285,7 +302,12 @@ void save() {
         fprintf(fout, "\n");
     }
 
-    fprintf(fout, "%d %d %d\n", player_x, player_y, inventory[gold]);
+    for (int i = 0; i < INVENTORY_SIZE; i++) {
+        fprintf(fout, "%d ", inventory[i]);
+    }
+    fprintf(fout, "\n");
+
+    fprintf(fout, "%d %d %d\n", player_x, player_y, selected_element);
 
     fclose(fout);
 }
@@ -308,7 +330,11 @@ void load() {
         }
     }
 
-    fscanf_s(fin, "%d%d%d", &player_x, &player_y, &inventory[gold]);
+    for (int i = 0; i < INVENTORY_SIZE; i++) {
+        fscanf_s(fin, "%d", &inventory[i]);
+    }
+
+    fscanf_s(fin, "%d%d%d", &player_x, &player_y, &selected_element);
 
     fclose(fin);
 }
@@ -322,6 +348,7 @@ char count_string[30];
 bool netToggle = false;
 
 enum keyboard {
+    VK_0 = 48, VK_1, VK_2, VK_3, VK_4, VK_5, VK_6, VK_7, VK_8, VK_9,
     VK_A = 65, VK_B, VK_C, VK_D, VK_E, VK_F, VK_G, VK_H,
     VK_I, VK_J, VK_K, VK_L, VK_M, VK_N, VK_O, VK_P, VK_Q,
     VK_R, VK_S, VK_T, VK_U, VK_V, VK_W, VK_X, VK_Y, VK_Z
@@ -375,7 +402,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             drawPlayer(hdc);
             if (netToggle) drawNet(hdc);
             
-            sprintf(count_string, "gold = %d", inventory[gold]);
+            if (selected_element == gold) sprintf(count_string, "gold = %d", inventory[gold]);
+            else sprintf(count_string, "wall = %d", inventory[wall]);
+            
             //SetBkMode(hdc, TRANSPARENT);
             DrawTextA(hdc, count_string, -1, &textrect, (DT_SINGLELINE | DT_TOP | DT_CENTER));
 
@@ -406,17 +435,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case VK_A:
             movePlayer(left);
             break;
+        case VK_1:
+            stomp(1);
+            break;
+        case VK_2:
+            stomp(2);
+            break;
+        case VK_Z:
+            deathbeam(right);
+            break;
+        case VK_G:
+            if (selected_element == gold) selected_element = wall;
+            else selected_element = gold;
+            break;
         case VK_LEFT:
-            putElement(left, gold);
+            putElement(left, selected_element);
             break;
         case VK_RIGHT:
-            putElement(right, gold);
+            putElement(right, selected_element);
             break;
         case VK_UP:
-            putElement(up, gold);
+            putElement(up, selected_element);
             break;
         case VK_DOWN:
-            putElement(down, gold);
+            putElement(down, selected_element);
             break;
         }
         InvalidateRect(hWnd, NULL, FALSE);

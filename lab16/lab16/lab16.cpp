@@ -86,8 +86,8 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 #define M 10
 #define N 15
-#define WIDTH 40
-#define HEIGHT 40
+#define WIDTH 50
+#define HEIGHT 50
 
 //
 //   ФУНКЦИЯ: InitInstance(HINSTANCE, int)
@@ -131,10 +131,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
-int player_x = 1;
-int player_y = 1;
-int gold = 0;
-
 // Коды ячеек:
 // 0 - свободна
 // 1 - 
@@ -154,6 +150,12 @@ int map[M][N] = {
     {0, 0, 0, 0, 0,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0}
 };
 
+int player_x = 1;
+int player_y = 1;
+
+enum obj_enum {empty = 0, wall = 2, gold = 3};
+int inventory[4] = { 0, 0, 0, 0 };
+
 enum enum_ways { left, right, up, down };
 void movePlayer(enum_ways move) {
     switch (move) {
@@ -172,25 +174,43 @@ void movePlayer(enum_ways move) {
     }
     if (map[player_y][player_x] == 3) {
         map[player_y][player_x] = 0;
-        gold++;
+        inventory[gold]++;
     }
 }
 
-void putElement(enum_ways way, int element) {
+void putElement(enum_ways way, obj_enum element) {
+    if (inventory[element] == 0) return;
+
     switch (way) {
     case left:
-        if ((player_x > 0) and map[player_y][player_x - 1] == 0) map[player_y][player_x - 1] = element;
+        if ((player_x > 0) and map[player_y][player_x - 1] == 0){
+            map[player_y][player_x - 1] = element;
+            inventory[element]--;
+        }
         break;
     case right:
-        if ((player_x < N - 1) and map[player_y][player_x + 1] == 0) map[player_y][player_x + 1] = element;
+        if ((player_x < N - 1) and map[player_y][player_x + 1] == 0) {
+            map[player_y][player_x + 1] = element;
+            inventory[element]--;
+        }
         break;
     case up:
-        if ((player_y > 0) and map[player_y - 1][player_x] == 0) map[player_y - 1][player_x] = element;
+        if ((player_y > 0) and map[player_y - 1][player_x] == 0) {
+            map[player_y - 1][player_x] = element;
+            inventory[element]--;
+        }
         break;
     case down:
-        if ((player_y < M - 1) and map[player_y + 1][player_x] == 0) map[player_y + 1][player_x] = element;
+        if ((player_y < M - 1) and map[player_y + 1][player_x] == 0) {
+            map[player_y + 1][player_x] = element;
+            inventory[element]--;
+        }
         break;
     }
+}
+
+void beam(enum_ways way) {
+
 }
 
 void drawNet(HDC hdc) {
@@ -265,7 +285,7 @@ void save() {
         fprintf(fout, "\n");
     }
 
-    fprintf(fout, "%d %d %d\n", player_x, player_y, gold);
+    fprintf(fout, "%d %d %d\n", player_x, player_y, inventory[gold]);
 
     fclose(fout);
 }
@@ -288,10 +308,16 @@ void load() {
         }
     }
 
-    fscanf_s(fin, "%d%d%d", &player_x, &player_y, &gold);
+    fscanf_s(fin, "%d%d%d", &player_x, &player_y, &inventory[gold]);
 
     fclose(fin);
 }
+
+int clip(int n, int lower, int upper) {
+    return max(lower, min(n, upper));
+}
+
+char count_string[30];
 
 bool netToggle = false;
 
@@ -338,9 +364,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Добавьте сюда любой код прорисовки, использующий HDC...
 
+            /*RECT textrect = {
+                (player_x - 1) * WIDTH, (player_y + 1) * HEIGHT,
+                (player_x + 2) * WIDTH, (player_y + 2) * HEIGHT
+            };*/
+
+            RECT textrect = { 0, 0, 100, 50 };
+
             drawMap(hdc);
             drawPlayer(hdc);
             if (netToggle) drawNet(hdc);
+            
+            sprintf(count_string, "gold = %d", inventory[gold]);
+            //SetBkMode(hdc, TRANSPARENT);
+            DrawTextA(hdc, count_string, -1, &textrect, (DT_SINGLELINE | DT_TOP | DT_CENTER));
 
             EndPaint(hWnd, &ps);
         }
@@ -369,8 +406,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case VK_A:
             movePlayer(left);
             break;
-        case VK_L:
-            putElement(right, 2);
+        case VK_LEFT:
+            putElement(left, gold);
+            break;
+        case VK_RIGHT:
+            putElement(right, gold);
+            break;
+        case VK_UP:
+            putElement(up, gold);
+            break;
+        case VK_DOWN:
+            putElement(down, gold);
+            break;
         }
         InvalidateRect(hWnd, NULL, FALSE);
         break;

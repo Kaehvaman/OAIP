@@ -103,16 +103,17 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
 
+   // стиль окна без кнопки разворачивания на весь экран и без возможности измения размера
    int wstyle = (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
 
-   RECT wnd = { 0, 0, N * WIDTH, M * HEIGHT };
+   RECT wnd = { 0, 0, N * WIDTH, M * HEIGHT }; // желаемый размер клиентской области окна
    AdjustWindowRectEx(&wnd, wstyle, 1, WS_EX_COMPOSITED);
 
    int width = wnd.right - wnd.left;
    int height = wnd.bottom - wnd.top;
 
    RECT workarea;
-   SystemParametersInfoW(SPI_GETWORKAREA, 0, &workarea, 0);
+   SystemParametersInfoW(SPI_GETWORKAREA, 0, &workarea, 0); // get size of primary desktop without taskbar
 
    int cx = ((workarea.right - workarea.left) / 2) - (width / 2);
    int cy = ((workarea.bottom - workarea.top) / 2) - (height / 2);

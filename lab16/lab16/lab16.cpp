@@ -344,7 +344,7 @@ int clip(int n, int lower, int upper) {
     return max(lower, min(n, upper));
 }
 
-char count_string[30];
+char count_string[50];
 
 bool netToggle = false;
 
@@ -404,8 +404,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (netToggle) drawNet(hdc);
             
             if (selected_element == gold) sprintf(count_string, "gold = %d", inventory[gold]);
-            else sprintf(count_string, "wall = %d", inventory[wall]);
+            else if (selected_element == wall) sprintf(count_string, "wall = %d", inventory[wall]);
+            else sprintf(count_string, "not selected");
             
+            //SetBkColor(hdc, RGB(255, 0, 0));
             //SetBkMode(hdc, TRANSPARENT);
             DrawTextA(hdc, count_string, -1, &textrect, (DT_SINGLELINE | DT_TOP | DT_CENTER));
 

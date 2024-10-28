@@ -88,6 +88,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 #define N 15
 #define WIDTH 50
 #define HEIGHT 50
+#define VOFFSET 50
 
 //
 //   ФУНКЦИЯ: InitInstance(HINSTANCE, int)
@@ -106,7 +107,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    // стиль окна без кнопки разворачивания на весь экран и без возможности измения размера
    int wstyle = (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
 
-   RECT wnd = { 0, 0, N * WIDTH, M * HEIGHT }; // желаемый размер клиентской области окна
+   RECT wnd = { 0, 0, N * WIDTH, M * HEIGHT + VOFFSET}; // желаемый размер клиентской области окна
    AdjustWindowRectEx(&wnd, wstyle, 1, WS_EX_COMPOSITED);
 
    int width = wnd.right - wnd.left;
@@ -278,6 +279,12 @@ void drawMap(HDC hdc) {
     }
 }
 
+void drawBottomBar(HDC hdc) {
+    HBRUSH hBrush = CreateSolidBrush(RGB(30, 30, 30));
+    RECT r = { 0, HEIGHT * M, WIDTH * N, HEIGHT * M + VOFFSET };
+    FillRect(hdc, &r, hBrush);
+}
+
 void drawPlayer(HDC hdc) {
     HBRUSH hBrushMan = CreateSolidBrush(RGB(0, 0, 255)); // синий
     int x1 = player_x * WIDTH;
@@ -344,8 +351,6 @@ int clip(int n, int lower, int upper) {
     return max(lower, min(n, upper));
 }
 
-char count_string[50];
-
 bool netToggle = false;
 
 enum keyboard {
@@ -399,20 +404,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             drawMap(hdc);
             drawPlayer(hdc);
+            drawBottomBar(hdc);
             if (netToggle) drawNet(hdc);
-            
-            if (selected_element == gold) sprintf(count_string, "gold = %d", inventory[gold]);
-            else if (selected_element == wall) sprintf(count_string, "wall = %d", inventory[wall]);
-            else sprintf(count_string, "not selected");
-            
-            RECT textrect = { 0, 0, 150, 50 };
-            HFONT hFont = CreateFontW(23, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
-                CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, TEXT("SegoeUI"));
+
+            char gold_string[50];
+            char wall_string[50];
+
+            sprintf(gold_string, " gold = %d", inventory[gold]);
+            sprintf(wall_string, " wall = %d", inventory[wall]);
+
+            if (selected_element == gold) gold_string[0] = '>';
+            else if (selected_element == wall) wall_string[0] = '>';
+
+            RECT textrect = { WIDTH / 4, HEIGHT * M, 150, HEIGHT * M + VOFFSET };
+
+            HFONT hFont = CreateFontW(24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+                CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, TEXT("Consolas"));
             SelectObject(hdc, hFont);
 
+            SetTextColor(hdc, RGB(78, 201, 176));
             //SetBkColor(hdc, RGB(255, 0, 0));
-            //SetBkMode(hdc, TRANSPARENT);
-            DrawTextA(hdc, count_string, -1, &textrect, (DT_SINGLELINE | DT_TOP | DT_CENTER));
+            SetBkMode(hdc, TRANSPARENT);
+            DrawTextA(hdc, gold_string, -1, &textrect, (DT_SINGLELINE | DT_TOP | DT_LEFT));
+            DrawTextA(hdc, wall_string, -1, &textrect, (DT_SINGLELINE | DT_BOTTOM | DT_LEFT));
 
             DeleteObject(hFont);
 

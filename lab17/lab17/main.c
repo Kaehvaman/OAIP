@@ -76,6 +76,24 @@ void F2(int n, FILE* f) {
 	}
 }
 
+void G3(int n, FILE* f);
+
+void F3(int n, FILE* f) {
+	if (n > 0) {
+		G3(n - 1, f);
+		fprintf(f, "G3(%d) returned\n", n - 1);
+	}
+}
+
+void G3(int n, FILE* f) {
+	printf_s("*");
+	fprintf(f, "G3(%d) -> print(*) \n", n);
+	if (n > 1) {
+		F3(n - 3, f);
+		fprintf(f, "F3(%d) returned\n", n - 3);
+	}
+}
+
 int main() {
 	FILE* fout = fopen("trace.txt", "w");
 	if (fout == NULL) {
@@ -86,21 +104,37 @@ int main() {
 	//printf("%lld", fact(5)); // 1
 
 	f1(11, fout);
+	fprintf(fout, "f1(%d) returned\n", 11);
+
 	fprintf(fout, "\n");
 	printf_s("\n\n");
 	f2(11, fout);
+	fprintf(fout, "f2(%d) returned\n", 11);
+
 	fprintf(fout, "\n");
 	printf_s("\n\n");
 	f3(11, fout);
+	fprintf(fout, "f3(%d) returned\n", 11);
+
 	fprintf(fout, "\n");
 	printf_s("\n\n");
 	recEGE1(3, fout);
+	fprintf(fout, "recEGE1(%d) returned\n", 3);
+
 	fprintf(fout, "\n");
 	printf_s("\n\n");
 	F1(10, fout);
+	fprintf(fout, "F1(%d) returned\n", 10);
+
 	fprintf(fout, "\n");
 	printf_s("\n\n");
 	F2(1, fout);
+	fprintf(fout, "F2(%d) returned\n", 1);
+
+	fprintf(fout, "\n");
+	printf_s("\n\n");
+	F3(11, fout);
+	fprintf(fout, "F3(%d) returned\n", 11);
 
 	fclose(fout);
 	return 0;

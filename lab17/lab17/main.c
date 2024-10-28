@@ -94,6 +94,14 @@ void G3(int n, FILE* f) {
 	}
 }
 
+void f9(int n) {
+	printf_s("<%d*", n);
+	if (n > 1) {
+		f9(n - 1);
+	}
+	printf_s("%d*>", n);
+}
+
 int main() {
 	FILE* fout = fopen("trace.txt", "w");
 	if (fout == NULL) {
@@ -135,6 +143,11 @@ int main() {
 	printf_s("\n\n");
 	F3(11, fout);
 	fprintf(fout, "F3(%d) returned\n", 11);
+
+	printf_s("\n\n");
+	f9(5);
+
+	printf_s("\n\n");
 
 	fclose(fout);
 	return 0;

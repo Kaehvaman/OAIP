@@ -232,6 +232,16 @@ void stomp(int r) {
     }
 }
 
+void midasHand(int m, int n) {
+    if (map[m][n] == wall) {
+        map[m][n] = gold;
+        if (m > 0) midasHand(m - 1, n);
+        if (n > 0) midasHand(m, n - 1);
+        if (m < M - 1) midasHand(m + 1, n);
+        if (n < N - 1) midasHand(m, n + 1);
+    }
+}
+
 void drawNet(HDC hdc) {
     for (int i = 0; i <= N * WIDTH; i = i + WIDTH) {
         MoveToEx(hdc, i, 0, NULL);
@@ -410,13 +420,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             char gold_string[50];
             char wall_string[50];
 
+            char help_string[] = "wasd - move player    G - change item\narrows - place item    M - Midas hand";
+
             sprintf(gold_string, " gold = %d", inventory[gold]);
             sprintf(wall_string, " wall = %d", inventory[wall]);
 
             if (selected_element == gold) gold_string[0] = '>';
             else if (selected_element == wall) wall_string[0] = '>';
 
-            RECT textrect = { WIDTH / 4, HEIGHT * M, 150, HEIGHT * M + VOFFSET };
+            RECT itemrect = { WIDTH / 4, HEIGHT * M, 150, HEIGHT * M + VOFFSET };
+            RECT helprect = { WIDTH * N - 500 , HEIGHT * M, WIDTH * N - WIDTH / 4, HEIGHT * M + VOFFSET };
 
             HFONT hFont = CreateFontW(24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
                 CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, TEXT("Consolas"));
@@ -425,8 +438,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SetTextColor(hdc, RGB(78, 201, 176));
             //SetBkColor(hdc, RGB(255, 0, 0));
             SetBkMode(hdc, TRANSPARENT);
-            DrawTextA(hdc, gold_string, -1, &textrect, (DT_SINGLELINE | DT_TOP | DT_LEFT));
-            DrawTextA(hdc, wall_string, -1, &textrect, (DT_SINGLELINE | DT_BOTTOM | DT_LEFT));
+            DrawTextA(hdc, gold_string, -1, &itemrect, (DT_SINGLELINE | DT_TOP | DT_LEFT));
+            DrawTextA(hdc, wall_string, -1, &itemrect, (DT_SINGLELINE | DT_BOTTOM | DT_LEFT));
+            DrawTextA(hdc, help_string, -1, &helprect, (DT_CENTER));
 
             DeleteObject(hFont);
 
@@ -465,6 +479,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case VK_Z:
             deathbeam(right);
+            break;
+        case VK_M:
+            if ((player_y < M - 1) and map[player_y + 1][player_x] == wall) midasHand(player_y + 1, player_x);
+            if ((player_x < N - 1) and map[player_y][player_x + 1] == wall) midasHand(player_y, player_x + 1);
+            if ((player_y > 0) and map[player_y - 1][player_x] == wall) midasHand(player_y - 1, player_x);
+            if ((player_x > 0) and map[player_y][player_x - 1] == wall) midasHand(player_y, player_x - 1);
             break;
         case VK_G:
             if (selected_element == gold) selected_element = wall;

@@ -154,7 +154,7 @@ int map[M][N] = {
 int player_x = 1;
 int player_y = 1;
 
-enum obj_enum {empty = 0, wall = 2, gold = 3};
+enum obj_enum { empty = 0, wall = 2, gold = 3 };
 // TODO: do something with "empty" object
 #define INVENTORY_SIZE 4
 int inventory[INVENTORY_SIZE] = { 0, 0, 15, 0 };
@@ -164,16 +164,16 @@ enum enum_ways { left, right, up, down };
 void movePlayer(enum_ways move) {
     switch (move) {
     case left:
-        if ((player_x > 0) and map[player_y][player_x - 1] != 2) player_x -= 1;
+        if ((player_x > 0) and map[player_y][player_x - 1] != wall) player_x -= 1;
         break;
     case right:
-        if ((player_x < N - 1) and map[player_y][player_x + 1] != 2) player_x += 1;
+        if ((player_x < N - 1) and map[player_y][player_x + 1] != wall) player_x += 1;
         break;
     case up:
-        if ((player_y > 0) and map[player_y - 1][player_x] != 2) player_y -= 1;
+        if ((player_y > 0) and map[player_y - 1][player_x] != wall) player_y -= 1;
         break;
     case down:
-        if ((player_y < M - 1) and map[player_y + 1][player_x] != 2) player_y += 1;
+        if ((player_y < M - 1) and map[player_y + 1][player_x] != wall) player_y += 1;
         break;
     }
     if (map[player_y][player_x] == gold) {
@@ -397,8 +397,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (player_x + 2) * WIDTH, (player_y + 2) * HEIGHT
             };*/
 
-            RECT textrect = { 0, 0, 100, 50 };
-
             drawMap(hdc);
             drawPlayer(hdc);
             if (netToggle) drawNet(hdc);
@@ -407,9 +405,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             else if (selected_element == wall) sprintf(count_string, "wall = %d", inventory[wall]);
             else sprintf(count_string, "not selected");
             
+            RECT textrect = { 0, 0, 150, 50 };
+            HFONT hFont = CreateFontW(23, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+                CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, TEXT("SegoeUI"));
+            SelectObject(hdc, hFont);
+
             //SetBkColor(hdc, RGB(255, 0, 0));
             //SetBkMode(hdc, TRANSPARENT);
             DrawTextA(hdc, count_string, -1, &textrect, (DT_SINGLELINE | DT_TOP | DT_CENTER));
+
+            DeleteObject(hFont);
 
             EndPaint(hWnd, &ps);
         }

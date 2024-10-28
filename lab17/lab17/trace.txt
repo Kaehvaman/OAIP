@@ -1,0 +1,96 @@
+f1(11) -> print(11) 
+f1(9) -> print(9) 
+f1(7) -> print(7) 
+f1(5) -> print(5) 
+f1(3) -> print(3) 
+f1(1) -> print(1) 
+f1(1) returned 
+f1(3) returned 
+f1(5) returned 
+f1(7) returned 
+f1(9) returned 
+
+f2(1) -> print(1) 
+f2(1) returned 
+f2(3) -> print(3) 
+f2(3) returned 
+f2(5) -> print(5) 
+f2(5) returned 
+f2(7) -> print(7) 
+f2(7) returned 
+f2(9) -> print(9) 
+f2(9) returned 
+f2(11) -> print(11) 
+
+f3(11) -> print(11) 
+f3(9) -> print(9) 
+f3(7) -> print(7) 
+f3(5) -> print(5) 
+f3(3) -> print(3) 
+f3(3) && n == 3 -> print(1) 
+f3(3) -> print(3) 
+f3(3) returned 
+f3(5) -> print(5) 
+f3(5) returned 
+f3(7) -> print(7) 
+f3(7) returned 
+f3(9) -> print(9) 
+f3(9) returned 
+f3(11) -> print(11) 
+
+recEGE1(3) && (n >= 1) == true -> print( 3) 
+recEGE1(2) && (n >= 1) == true -> print( 2) 
+recEGE1(1) && (n >= 1) == true -> print( 1) 
+1)recEGE1(0) returned
+2)recEGE1(0) returned 
+1)recEGE1(1) returned
+recEGE1(1) && (n >= 1) == true -> print( 1) 
+1)recEGE1(0) returned
+2)recEGE1(0) returned 
+2)recEGE1(1) returned 
+1)recEGE1(2) returned
+recEGE1(2) && (n >= 1) == true -> print( 2) 
+recEGE1(1) && (n >= 1) == true -> print( 1) 
+1)recEGE1(0) returned
+2)recEGE1(0) returned 
+1)recEGE1(1) returned
+recEGE1(1) && (n >= 1) == true -> print( 1) 
+1)recEGE1(0) returned
+2)recEGE1(0) returned 
+2)recEGE1(1) returned 
+2)recEGE1(2) returned 
+
+F1(10) -> print(10) 
+F1(7) -> print(7) 
+F1(4) -> print(4) 
+1)F1(1) returned
+2)F1(0) returned
+1)F1(4) returned
+F1(3) -> print(3) 
+1)F1(0) returned
+2)F1(-1) returned
+2)F1(3) returned
+1)F1(7) returned
+F1(6) -> print(6) 
+F1(3) -> print(3) 
+1)F1(0) returned
+2)F1(-1) returned
+1)F1(3) returned
+2)F1(2) returned
+2)F1(6) returned
+
+F2(1) -> print(1) 
+F2(2) -> print(2) 
+F2(3) -> print(3) 
+F2(4) -> print(4) 
+1)F2(5) returned
+2)F2(7) returned
+1)F2(4) returned
+2)F2(6) returned
+1)F2(3) returned
+2)F2(5) returned
+1)F2(2) returned
+F2(4) -> print(4) 
+1)F2(5) returned
+2)F2(7) returned
+2)F2(4) returned

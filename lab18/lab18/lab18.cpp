@@ -140,19 +140,36 @@ void drawTriangle(HDC hdc, int cx, int cy, int size) {
     DeleteObject(hPen);
 }
 
-void drawRecursiveTriangle(HDC hdc, int cx, int cy, int size, int mode) {
-    drawTriangle(hdc, cx, cy, size);
+void drawRecursiveImage(HDC hdc, int cx, int cy, int size, int mode, void image(HDC hdc, int cx, int cy, int size)) {
+    image(hdc, cx, cy, size);
 
     if (size < 20) {
         return;
     }
 
-    if (mode > 0) drawRecursiveTriangle(hdc, cx, cy - size, size / 2, mode);
-    if (mode > 1) drawRecursiveTriangle(hdc, cx + size, cy + size, size / 2, mode);
-    if (mode > 2) drawRecursiveTriangle(hdc, cx - size, cy + size, size / 2, mode);
+    if (mode > 0 && mode != 3) drawRecursiveImage(hdc, cx, cy - size, size / 2, mode, image);
+    if (mode > 1 && mode != 4) drawRecursiveImage(hdc, cx + size, cy + size, size / 2, mode, image);
+    if (mode > 2) drawRecursiveImage(hdc, cx - size, cy + size, size / 2, mode, image);
+}
+
+void drawHourglass(HDC hdc, int cx, int cy, int size) {
+    HPEN hPen = CreatePen(PS_SOLID, 4, RGB(78, 180, 200));
+    SelectObject(hdc, hPen);
+
+    POINT p[5] = {
+        cx - size / 2,  cy - size,
+        cx + size / 2,	cy - size,
+        cx - size,      cy + size,
+        cx + size,      cy + size,
+        cx - size / 2,  cy - size
+    };
+    Polyline(hdc, p, 5);
+
+    DeleteObject(hPen);
 }
 
 int trmode = 0;
+int imageVar = 0;
 
 //
 //  ФУНКЦИЯ: WndProc(HWND, UINT, WPARAM, LPARAM)
@@ -196,7 +213,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             if (netToggle) drawNet(hdc, rect.right, rect.bottom, 50, 50);
 
+
+
             drawRecursiveTriangle(hdc, 300, 300, 100, trmode);
+
+            drawHourglass(hdc, 500, 300, 100);
 
             EndPaint(hWnd, &ps);
         }
@@ -210,7 +231,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         default:
             trmode++;
-            if (trmode > 3) trmode = 0;
+            if (trmode > 5) trmode = 0;
             break;
         }
         InvalidateRect(hWnd, NULL, TRUE);

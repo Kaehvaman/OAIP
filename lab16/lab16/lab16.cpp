@@ -293,6 +293,7 @@ void drawBottomBar(HDC hdc) {
     HBRUSH hBrush = CreateSolidBrush(RGB(30, 30, 30));
     RECT r = { 0, HEIGHT * M, WIDTH * N, HEIGHT * M + VOFFSET };
     FillRect(hdc, &r, hBrush);
+    DeleteObject(hBrush);
 }
 
 void drawPlayer(HDC hdc) {
@@ -303,6 +304,7 @@ void drawPlayer(HDC hdc) {
     int y2 = (player_y + 1) * HEIGHT;
     RECT r = { x1, y1, x2, y2 };
     FillRect(hdc, &r, hBrushMan);
+    DeleteObject(hBrushMan);
 }
 
 void save() {

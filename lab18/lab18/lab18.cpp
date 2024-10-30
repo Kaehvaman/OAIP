@@ -126,7 +126,7 @@ void drawNet(HDC hdc, int width, int height, int hstep, int vstep) {
 }
 
 void drawTriangle(HDC hdc, int cx, int cy, int size) {
-    HPEN hPen = CreatePen(PS_SOLID, 4, RGB(78, 201, 176));
+    HPEN hPen = CreatePen(PS_SOLID, 3, RGB(78, 201, 176));
     SelectObject(hdc, hPen);
 
     POINT p[4] = {
@@ -141,7 +141,7 @@ void drawTriangle(HDC hdc, int cx, int cy, int size) {
 }
 
 void drawHourglass(HDC hdc, int cx, int cy, int size) {
-    HPEN hPen = CreatePen(PS_SOLID, 4, RGB(78, 180, 200));
+    HPEN hPen = CreatePen(PS_SOLID, 3, RGB(78, 180, 200));
     SelectObject(hdc, hPen);
 
     POINT p[5] = {
@@ -152,6 +152,42 @@ void drawHourglass(HDC hdc, int cx, int cy, int size) {
         cx - size / 2,  cy - size
     };
     Polyline(hdc, p, 5);
+
+    DeleteObject(hPen);
+}
+
+void drawRomb(HDC hdc, int cx, int cy, int size) {
+    HPEN hPen = CreatePen(PS_SOLID, 3, RGB(78, 201, 176));
+    SelectObject(hdc, hPen);
+
+    POINT p[5] = {
+        cx,         cy - size,
+        cx + size,	cy,
+        cx,         cy + size,
+        cx - size,  cy,
+        cx,         cy - size,
+    };
+    Polyline(hdc, p, 5);
+
+    DeleteObject(hPen);
+}
+
+void drawStar(HDC hdc, int cx, int cy, int size) {
+    HPEN hPen = CreatePen(PS_SOLID, 3, RGB(78, 180, 200));
+    SelectObject(hdc, hPen);
+
+    POINT p[9] = {
+        cx,             cy - size,
+        cx + size / 4,	cy - size / 4,
+        cx + size,      cy,
+        cx + size / 4,  cy + size / 4,
+        cx,             cy + size,
+        cx - size / 4,  cy + size / 4,
+        cx - size,      cy,
+        cx - size / 4,  cy - size / 4,
+        cx,             cy - size
+    };
+    Polyline(hdc, p, 9);
 
     DeleteObject(hPen);
 }
@@ -174,11 +210,42 @@ void drawRecursiveHourglass(HDC hdc, int cx, int cy, int size, int mode) {
         return;
     }
 
-    drawRecursiveHourglass(hdc, cx - size / 2, cy - size, size / 2, mode);
+    if (mode >= 1 && mode < 4) drawRecursiveHourglass(hdc, cx - size / 2, cy - size, size / 2, mode);
+    if (mode >= 2 && mode < 4) drawRecursiveHourglass(hdc, cx + size / 2, cy - size, size / 2, mode);
+    if (mode >= 3 && mode < 5) {
+        drawRecursiveHourglass(hdc, cx - size, cy + size, size / 2, mode);
+        drawRecursiveHourglass(hdc, cx + size, cy + size, size / 2, mode);
+    }
+    if (mode == 5 || mode == 7) drawRecursiveHourglass(hdc, cx - size, cy, size / 2, mode);
+    if (mode == 6 || mode == 7) drawRecursiveHourglass(hdc, cx + size, cy, size / 2, mode);
 
 }
 
+void drawRecursiveRomb(HDC hdc, int cx, int cy, int size, int mode) {
+    drawRomb(hdc, cx, cy, size);
+    if (size < 20) {
+        return;
+    }
+    drawRecursiveRomb(hdc, cx - size, cy, size / 2, mode);
+    drawRecursiveRomb(hdc, cx + size, cy, size / 2, mode);
+    if (mode == 1 || mode == 3) drawRecursiveRomb(hdc, cx, cy + size, size / 2, mode);
+    if (mode == 2 || mode == 3) drawRecursiveRomb(hdc, cx, cy - size, size / 2, mode);
+}
+
+void drawRecursiveStar(HDC hdc, int cx, int cy, int size, int mode) {
+    drawStar(hdc, cx, cy, size);
+    if (size < 20) {
+        return;
+    }
+    if (mode == drawRecursiveStar(hdc, cx - size, cy, size / 2, mode);
+    drawRecursiveStar(hdc, cx + size, cy, size / 2, mode);
+    if (mode == 1 || mode == 3) drawRecursiveStar(hdc, cx, cy + size, size / 2, mode);
+    if (mode == 2 || mode == 3) drawRecursiveStar(hdc, cx, cy - size, size / 2, mode);
+}
+
 int trmode = 0;
+int hgmode = 0;
+int rbmode = 0;
 int imageVar = 0;
 
 //
@@ -224,7 +291,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (netToggle) drawNet(hdc, rect.right, rect.bottom, 50, 50);
 
             drawRecursiveTriangle(hdc, 300, 300, 100, trmode);            
-            drawRecursiveHourglass(hdc, 600, 300, 100, trmode);
+            drawRecursiveHourglass(hdc, 600, 300, 100, hgmode);
+
+            //drawRecursiveRomb(hdc, 1100, 300, 100, rbmode);
+            drawRecursiveStar(hdc, 1100, 300, 100, rbmode);
 
             EndPaint(hWnd, &ps);
         }
@@ -238,7 +308,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         default:
             trmode++;
+            hgmode++;
+            rbmode++;
             if (trmode > 5) trmode = 0;
+            if (hgmode > 7) hgmode = 0;
+            if (rbmode > 3) rbmode = 0;
             break;
         }
         InvalidateRect(hWnd, NULL, TRUE);

@@ -140,18 +140,6 @@ void drawTriangle(HDC hdc, int cx, int cy, int size) {
     DeleteObject(hPen);
 }
 
-void drawRecursiveImage(HDC hdc, int cx, int cy, int size, int mode, void image(HDC hdc, int cx, int cy, int size)) {
-    image(hdc, cx, cy, size);
-
-    if (size < 20) {
-        return;
-    }
-
-    if (mode > 0 && mode != 3) drawRecursiveImage(hdc, cx, cy - size, size / 2, mode, image);
-    if (mode > 1 && mode != 4) drawRecursiveImage(hdc, cx + size, cy + size, size / 2, mode, image);
-    if (mode > 2) drawRecursiveImage(hdc, cx - size, cy + size, size / 2, mode, image);
-}
-
 void drawHourglass(HDC hdc, int cx, int cy, int size) {
     HPEN hPen = CreatePen(PS_SOLID, 4, RGB(78, 180, 200));
     SelectObject(hdc, hPen);
@@ -166,6 +154,28 @@ void drawHourglass(HDC hdc, int cx, int cy, int size) {
     Polyline(hdc, p, 5);
 
     DeleteObject(hPen);
+}
+
+void drawRecursiveTriangle(HDC hdc, int cx, int cy, int size, int mode) {
+    drawTriangle(hdc, cx, cy, size);
+
+    if (size < 20) {
+        return;
+    }
+
+    if (mode > 0 && mode != 3) drawRecursiveTriangle(hdc, cx, cy - size, size / 2, mode);
+    if (mode > 1 && mode != 4) drawRecursiveTriangle(hdc, cx + size, cy + size, size / 2, mode);
+    if (mode > 2) drawRecursiveTriangle(hdc, cx - size, cy + size, size / 2, mode);
+}
+
+void drawRecursiveHourglass(HDC hdc, int cx, int cy, int size, int mode) {
+    drawHourglass(hdc, cx, cy, size);
+    if (size < 20) {
+        return;
+    }
+
+    drawRecursiveHourglass(hdc, cx - size / 2, cy - size, size / 2, mode);
+
 }
 
 int trmode = 0;
@@ -213,11 +223,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             if (netToggle) drawNet(hdc, rect.right, rect.bottom, 50, 50);
 
-
-
-            drawRecursiveTriangle(hdc, 300, 300, 100, trmode);
-
-            drawHourglass(hdc, 500, 300, 100);
+            drawRecursiveTriangle(hdc, 300, 300, 100, trmode);            
+            drawRecursiveHourglass(hdc, 600, 300, 100, trmode);
 
             EndPaint(hWnd, &ps);
         }

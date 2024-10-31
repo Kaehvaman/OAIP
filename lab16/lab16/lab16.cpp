@@ -310,7 +310,12 @@ void drawPlayer(HDC hdc) {
 void save() {
     FILE* fout = fopen("savefile.txt", "w");
     if (fout == NULL) {
-        puts("Невозможно создать файл");
+        MessageBox(
+            NULL,
+            (LPCWSTR)L"Невозможно создать файл",
+            (LPCWSTR)L"Ошибка сохранения",
+            MB_ICONERROR
+        );
         return;
     }
 
@@ -335,7 +340,12 @@ void save() {
 void load() {
     FILE* fin = fopen("savefile.txt", "r");
     if (fin == NULL) {
-        puts("Файл не найден");
+        MessageBox(
+            NULL,
+            (LPCWSTR)L"Файл не найден\nПопробуйте сначала сохранить игру",
+            (LPCWSTR)L"Ошибка загрузки",
+            MB_ICONERROR
+        );
         return;
     }
     int m, n;
@@ -422,7 +432,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             char gold_string[50];
             char wall_string[50];
 
-            char help_string[] = "wasd - move player    G - change item\narrows - place item    M - Midas hand";
+            char help_string[] = "wasd - move player   G - change item   F5 - save\narrows - place item   M - Midas hand   F6 - load";
 
             sprintf(gold_string, " gold = %d", inventory[gold]);
             sprintf(wall_string, " wall = %d", inventory[wall]);
@@ -431,7 +441,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             else if (selected_element == wall) wall_string[0] = '>';
 
             RECT itemrect = { WIDTH / 4, HEIGHT * M, 150, HEIGHT * M + VOFFSET };
-            RECT helprect = { WIDTH * N - 500 , HEIGHT * M, WIDTH * N - WIDTH / 4, HEIGHT * M + VOFFSET };
+            RECT helprect = { WIDTH * N - 550 , HEIGHT * M, WIDTH * N - WIDTH / 4, HEIGHT * M + VOFFSET };
 
             HFONT hFont = CreateFontW(24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
                 CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, TEXT("Consolas"));

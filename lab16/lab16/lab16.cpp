@@ -242,6 +242,13 @@ void midasHand(int m, int n) {
     }
 }
 
+void doMidashand() {
+    if ((player_y < M - 1) and map[player_y + 1][player_x] == wall) midasHand(player_y + 1, player_x);
+    if ((player_x < N - 1) and map[player_y][player_x + 1] == wall) midasHand(player_y, player_x + 1);
+    if ((player_y > 0) and map[player_y - 1][player_x] == wall) midasHand(player_y - 1, player_x);
+    if ((player_x > 0) and map[player_y][player_x - 1] == wall) midasHand(player_y, player_x - 1);
+}
+
 void drawNet(HDC hdc) {
     for (int i = 0; i <= N * WIDTH; i = i + WIDTH) {
         MoveToEx(hdc, i, 0, NULL);
@@ -294,6 +301,38 @@ void drawBottomBar(HDC hdc) {
     RECT r = { 0, HEIGHT * M, WIDTH * N, HEIGHT * M + VOFFSET };
     FillRect(hdc, &r, hBrush);
     DeleteObject(hBrush);
+
+    char gold_string[50];
+    char wall_string[50];
+
+    char help_string[] = "wasd - move player   G - change item   F5 - save\narrows - place item   M - Midas hand   F6 - load";
+
+    sprintf(gold_string, " gold = %d", inventory[gold]);
+    sprintf(wall_string, " wall = %d", inventory[wall]);
+
+    if (selected_element == gold) gold_string[0] = '>';
+    else if (selected_element == wall) wall_string[0] = '>';
+
+    /*RECT textrect = {
+    (player_x - 1) * WIDTH, (player_y + 1) * HEIGHT,
+    (player_x + 2) * WIDTH, (player_y + 2) * HEIGHT
+    };*/
+
+    RECT itemrect = { WIDTH / 4, HEIGHT * M, 150, HEIGHT * M + VOFFSET };
+    RECT helprect = { WIDTH * N - 550 , HEIGHT * M, WIDTH * N - WIDTH / 4, HEIGHT * M + VOFFSET };
+
+    HFONT hFont = CreateFontW(24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+        CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, TEXT("Consolas"));
+    SelectObject(hdc, hFont);
+
+    SetTextColor(hdc, RGB(78, 201, 176));
+    //SetBkColor(hdc, RGB(255, 0, 0));
+    SetBkMode(hdc, TRANSPARENT);
+    DrawTextA(hdc, gold_string, -1, &itemrect, (DT_SINGLELINE | DT_TOP | DT_LEFT));
+    DrawTextA(hdc, wall_string, -1, &itemrect, (DT_SINGLELINE | DT_BOTTOM | DT_LEFT));
+    DrawTextA(hdc, help_string, -1, &helprect, (DT_CENTER));
+
+    DeleteObject(hFont);
 }
 
 void drawPlayer(HDC hdc) {
@@ -307,11 +346,11 @@ void drawPlayer(HDC hdc) {
     DeleteObject(hBrushMan);
 }
 
-void save() {
+void save(HWND hWnd) {
     FILE* fout = fopen("savefile.txt", "w");
     if (fout == NULL) {
         MessageBox(
-            NULL,
+            hWnd,
             (LPCWSTR)L"Невозможно создать файл",
             (LPCWSTR)L"Ошибка сохранения",
             MB_ICONERROR
@@ -337,11 +376,11 @@ void save() {
     fclose(fout);
 }
 
-void load() {
+void load(HWND hWnd) {
     FILE* fin = fopen("savefile.txt", "r");
     if (fin == NULL) {
         MessageBox(
-            NULL,
+            hWnd,
             (LPCWSTR)L"Файл не найден\nПопробуйте сначала сохранить игру",
             (LPCWSTR)L"Ошибка загрузки",
             MB_ICONERROR
@@ -352,6 +391,12 @@ void load() {
     fscanf_s(fin, "%d%d", &m, &n);
     if (m != M || n != N) {
         printf("Неправильный размер карты!");
+        MessageBox(
+            hWnd,
+            (LPCWSTR)L"Неправильный размер карты!\nПроверьте целостность сохранения",
+            (LPCWSTR)L"Ошибка загрузки",
+            MB_ICONERROR
+        );
         return;
     }
     for (int i = 0; i < m; i++) {
@@ -419,42 +464,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Добавьте сюда любой код прорисовки, использующий HDC...
 
-            /*RECT textrect = {
-                (player_x - 1) * WIDTH, (player_y + 1) * HEIGHT,
-                (player_x + 2) * WIDTH, (player_y + 2) * HEIGHT
-            };*/
-
             drawMap(hdc);
-            drawPlayer(hdc);
             drawBottomBar(hdc);
+            drawPlayer(hdc);
             if (netToggle) drawNet(hdc);
 
-            char gold_string[50];
-            char wall_string[50];
 
-            char help_string[] = "wasd - move player   G - change item   F5 - save\narrows - place item   M - Midas hand   F6 - load";
-
-            sprintf(gold_string, " gold = %d", inventory[gold]);
-            sprintf(wall_string, " wall = %d", inventory[wall]);
-
-            if (selected_element == gold) gold_string[0] = '>';
-            else if (selected_element == wall) wall_string[0] = '>';
-
-            RECT itemrect = { WIDTH / 4, HEIGHT * M, 150, HEIGHT * M + VOFFSET };
-            RECT helprect = { WIDTH * N - 550 , HEIGHT * M, WIDTH * N - WIDTH / 4, HEIGHT * M + VOFFSET };
-
-            HFONT hFont = CreateFontW(24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
-                CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, TEXT("Consolas"));
-            SelectObject(hdc, hFont);
-
-            SetTextColor(hdc, RGB(78, 201, 176));
-            //SetBkColor(hdc, RGB(255, 0, 0));
-            SetBkMode(hdc, TRANSPARENT);
-            DrawTextA(hdc, gold_string, -1, &itemrect, (DT_SINGLELINE | DT_TOP | DT_LEFT));
-            DrawTextA(hdc, wall_string, -1, &itemrect, (DT_SINGLELINE | DT_BOTTOM | DT_LEFT));
-            DrawTextA(hdc, help_string, -1, &helprect, (DT_CENTER));
-
-            DeleteObject(hFont);
 
             EndPaint(hWnd, &ps);
         }
@@ -463,10 +478,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         switch (wParam)
         {
         case VK_F5:
-            save();
+            save(hWnd);
             break;
         case VK_F6:
-            load();
+            load(hWnd);
             break;
         case VK_SPACE:
             netToggle = !netToggle;
@@ -493,10 +508,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             deathbeam(right);
             break;
         case VK_M:
-            if ((player_y < M - 1) and map[player_y + 1][player_x] == wall) midasHand(player_y + 1, player_x);
-            if ((player_x < N - 1) and map[player_y][player_x + 1] == wall) midasHand(player_y, player_x + 1);
-            if ((player_y > 0) and map[player_y - 1][player_x] == wall) midasHand(player_y - 1, player_x);
-            if ((player_x > 0) and map[player_y][player_x - 1] == wall) midasHand(player_y, player_x - 1);
+            doMidashand();
             break;
         case VK_G:
             if (selected_element == gold) selected_element = wall;

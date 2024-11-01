@@ -98,7 +98,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   HWND hWnd = CreateWindowExW(WS_EX_COMPOSITED, szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
@@ -330,10 +330,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             drawRecursiveTriangle(hdc, 300, 300, 100, trmode);            
             drawRecursiveHourglass(hdc, 700, 300, 100, hgmode);
 
-            //drawRecursiveRomb(hdc, 1100, 300, 100, rbmode);
+            drawRecursiveRomb(hdc, 300, 700, 100, rbmode);
             drawRecursiveStar(hdc, 1100, 300, 100, rbmode);
 
-            drawRecursiveCircle(hdc, 500, 500, 200, 5);
+            drawRecursiveCircle(hdc, 1300, 700, 200, 5);
             circlecount = 0;
 
             EndPaint(hWnd, &ps);

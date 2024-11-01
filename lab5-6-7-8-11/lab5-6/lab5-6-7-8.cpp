@@ -558,7 +558,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             if (netToggle) drawNet(hdc, rect.right, rect.bottom); //drawNet(hdc, 1400, 650);
             
-            //drawImageSequence1(hdc);
+            drawImageSequence1(hdc);
 
             //lab5(hdc);
             

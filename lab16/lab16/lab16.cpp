@@ -178,7 +178,7 @@ void movePlayer(enum_ways move) {
         break;
     }
     if (map[player_y][player_x] == gold) {
-        map[player_y][player_x] = 0;
+        map[player_y][player_x] = empty;
         inventory[gold]++;
     }
 }
@@ -325,7 +325,7 @@ void drawBottomBar(HDC hdc) {
         CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, TEXT("Consolas"));
     SelectObject(hdc, hFont);
 
-    SetTextColor(hdc, RGB(78, 201, 176));
+    SetTextColor(hdc, RGB(0, 0, 0));
     //SetBkColor(hdc, RGB(255, 0, 0));
     SetBkMode(hdc, TRANSPARENT);
     DrawTextA(hdc, gold_string, -1, &itemrect, (DT_SINGLELINE | DT_TOP | DT_LEFT));

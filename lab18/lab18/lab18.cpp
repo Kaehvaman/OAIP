@@ -3,6 +3,7 @@
 
 #include "framework.h"
 #include "lab18.h"
+#include "stdio.h"
 
 #define MAX_LOADSTRING 100
 
@@ -173,7 +174,7 @@ void drawRomb(HDC hdc, int cx, int cy, int size) {
 }
 
 void drawStar(HDC hdc, int cx, int cy, int size) {
-    HPEN hPen = CreatePen(PS_SOLID, 3, RGB(78, 180, 200));
+    HPEN hPen = CreatePen(PS_SOLID, 3, RGB(78, 180, 255));
     SelectObject(hdc, hPen);
 
     POINT p[9] = {
@@ -188,6 +189,15 @@ void drawStar(HDC hdc, int cx, int cy, int size) {
         cx,             cy - size
     };
     Polyline(hdc, p, 9);
+
+    DeleteObject(hPen);
+}
+
+void drawCirle(HDC hdc, int cx, int cy, int size) {
+    HPEN hPen = CreatePen(PS_SOLID, 3, RGB(255, 0, 255));
+    SelectObject(hdc, hPen);
+
+    Ellipse(hdc, cx - size, cy - size, cx + size, cy + size);
 
     DeleteObject(hPen);
 }
@@ -237,10 +247,37 @@ void drawRecursiveStar(HDC hdc, int cx, int cy, int size, int mode) {
     if (size < 20) {
         return;
     }
-    if (mode == drawRecursiveStar(hdc, cx - size, cy, size / 2, mode);
-    drawRecursiveStar(hdc, cx + size, cy, size / 2, mode);
-    if (mode == 1 || mode == 3) drawRecursiveStar(hdc, cx, cy + size, size / 2, mode);
-    if (mode == 2 || mode == 3) drawRecursiveStar(hdc, cx, cy - size, size / 2, mode);
+    if (mode == 0 || mode == 2) drawRecursiveStar(hdc, cx - size, cy, size / 2, mode);
+    if (mode == 0) drawRecursiveStar(hdc, cx + size, cy, size / 2, mode);
+    if (mode == 1 || mode == 2) drawRecursiveStar(hdc, cx, cy + size, size / 2, mode);
+    if (mode == 1 || mode == 2) drawRecursiveStar(hdc, cx, cy - size, size / 2, mode);
+}
+
+int circlecount = 0;
+void drawRecursiveCircle(HDC hdc, int cx, int cy, int size, int i) {
+    drawCirle(hdc, cx, cy, size);
+    i--;
+    circlecount++;
+
+    static HFONT hFont = CreateFontW(18, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+        CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, TEXT("Consolas"));
+
+    SelectObject(hdc, hFont);
+    SetTextColor(hdc, RGB(0, 0, 0));
+    SetBkMode(hdc, TRANSPARENT);
+
+    static char circle_string[10];
+    sprintf_s(circle_string, "%d", circlecount);
+    RECT circlerect = { cx - size, cy - size, cx + size, cy + size };
+
+    DrawTextA(hdc, circle_string, -1, &circlerect, (DT_SINGLELINE | DT_VCENTER | DT_CENTER));
+
+    if (i == 0) {
+        return;
+    }
+
+    drawRecursiveCircle(hdc, cx, cy - size, size / 2, i);
+    drawRecursiveCircle(hdc, cx + size, cy, size / 2, i);
 }
 
 int trmode = 0;
@@ -291,10 +328,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (netToggle) drawNet(hdc, rect.right, rect.bottom, 50, 50);
 
             drawRecursiveTriangle(hdc, 300, 300, 100, trmode);            
-            drawRecursiveHourglass(hdc, 600, 300, 100, hgmode);
+            drawRecursiveHourglass(hdc, 700, 300, 100, hgmode);
 
             //drawRecursiveRomb(hdc, 1100, 300, 100, rbmode);
             drawRecursiveStar(hdc, 1100, 300, 100, rbmode);
+
+            drawRecursiveCircle(hdc, 500, 500, 200, 5);
+            circlecount = 0;
 
             EndPaint(hWnd, &ps);
         }

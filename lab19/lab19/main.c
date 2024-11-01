@@ -75,7 +75,7 @@ void save(int arr[], int len, char filename[]) {
 
 void saveRandomArray() {
 	int len = 1000;
-	char filename[] = "out3.txt";
+	char filename[] = "in3.txt";
 
 	int* parr;
 	parr = (int*)malloc(sizeof(int) * len);
@@ -85,7 +85,7 @@ void saveRandomArray() {
 	}
 	
 	for (int i = 0; i < len; i++) {
-		parr[i] = rand() % 60 - 30;
+		parr[i] = rand() % 60 - 20;
 	}
 
 	save(parr, len, filename);
@@ -104,7 +104,7 @@ void dotasks12(int arr[], int len) {
 	}
 
 	int* parr;
-	parr = (int*)malloc(sizeof(int) * count);
+	parr = (int*)malloc(sizeof(int) * (count + 1));
 	if (parr == NULL) {
 		printf_s("Not enough memory\n");
 		exit(EXIT_FAILURE);
@@ -121,8 +121,46 @@ void dotasks12(int arr[], int len) {
 	save(parr, count, "tasks12.txt");
 }
 
+void task3() {
+	int* arr;
+	int len = load(&arr, "in3.txt");
+
+	int sum = 0;
+	for (int i = 0; i < len; i++) {
+		sum += arr[i];
+	}
+	double average = (double)sum / len;
+
+	int count = 0;
+	for (int i = 0; i < len; i++) {
+		if ((arr[i] > 0) && (arr[i] < average)) count++;
+	}
+
+	int* parr;
+	parr = (int*)malloc(sizeof(int) * (count + 1));
+	if (parr == NULL) {
+		printf_s("Not enough memory\n");
+		exit(EXIT_FAILURE);
+	}
+
+	int j = 0;
+	for (int i = 0; i < len; i++) {
+		if ((arr[i] > 0) && (arr[i] < average)) {
+			parr[j] = arr[i];
+			j++;
+		}
+	}
+
+	save(parr, count, "out3.txt");
+}
+
 int main() {
-	saveRandomArray();
+	//saveRandomArray();
+	
+	// task 1
+	/*int fixarr[1000];
+	int flen = loadToFixedArray(fixarr, 1000, "data.txt");
+	dotasks12(fixarr, flen);*/
 
 	// task 2
 	//int* parr;
@@ -130,11 +168,7 @@ int main() {
 	//dotasks12(parr, len);
 	//printarr(parr, len);
 
-
-	// task 1
-	/*int fixarr[1000];
-	int flen = loadToFixedArray(fixarr, 1000, "data.txt");
-	dotasks12(fixarr, flen);*/
+	task3();
 
 	return 0;
 }

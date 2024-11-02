@@ -20,10 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="data.txt">
+    <Text Include="in12.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
-    <Text Include="tasks12.txt">
+    <Text Include="out12.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
     <Text Include="in3.txt">
@@ -42,6 +42,9 @@
       <Filter>Файлы ресурсов</Filter>
     </Text>
     <Text Include="out5.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="rand.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
   </ItemGroup>

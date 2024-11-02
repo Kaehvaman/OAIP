@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>  
 
 void printarr(int arr[], int len) {
 	printf("[");
@@ -75,7 +76,7 @@ void save(int arr[], int len, char filename[]) {
 
 void saveRandomArray() {
 	int len = 1000;
-	char filename[] = "in4.txt";
+	char filename[] = "rand.txt";
 
 	int* parr;
 	parr = (int*)malloc(sizeof(int) * len);
@@ -120,7 +121,7 @@ void dotasks12(int arr[], int len) {
 		}
 	}
 
-	save(parr, count, "tasks12.txt");
+	save(parr, count, "out12.txt");
 
 	free(parr);
 }
@@ -287,17 +288,46 @@ void task5() {
 	free(podd);
 }
 
+int clip(int n, int lower, int upper) {
+	return max(lower, min(n, upper));
+}
+
+void createRandomBinFiles(int n, int minsize, int maxsize) {
+	return;
+
+	if (minsize <= 0 || maxsize >= INT_MAX || maxsize < minsize) {
+		puts("Incorrect minsize or maxsize");
+		return;
+	}
+
+	for (int i = 0; i < n; i++) {
+		int size = clip(rand(), minsize, maxsize);
+
+		int* pa = (int*)malloc(size);
+		if (pa == NULL) {
+			puts("Out of memory");
+			exit(EXIT_FAILURE);
+		}
+
+		for (int i = 0; i < size; i++) {
+
+		}
+	}
+}
+
 int main() {
+	srand(time(NULL));
+
 	//saveRandomArray();
 	
 	// task 1
 	/*int fixarr[1000];
-	int flen = loadToFixedArray(fixarr, 1000, "data.txt");
+	int flen = loadToFixedArray(fixarr, 1000, "in12.txt");
 	dotasks12(fixarr, flen);*/
 
 	// task 2
 	//int* parr;
-	//int len = load(&parr, "data.txt");
+	//int len = load(&parr, "in12.txt");
 	//dotasks12(parr, len);
 	//printarr(parr, len);
 	//free(parr);
@@ -307,7 +337,7 @@ int main() {
 
 	//task4();
 
-	task5();
+	//task5();
 
 	return 0;
 }

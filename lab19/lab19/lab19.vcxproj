@@ -131,14 +131,15 @@
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="data.txt" />
+    <Text Include="in12.txt" />
     <Text Include="in3.txt" />
     <Text Include="in4.txt" />
     <Text Include="in5.txt" />
     <Text Include="out3.txt" />
     <Text Include="out4.txt" />
     <Text Include="out5.txt" />
-    <Text Include="tasks12.txt" />
+    <Text Include="out12.txt" />
+    <Text Include="rand.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

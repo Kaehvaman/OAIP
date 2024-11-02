@@ -32,5 +32,11 @@
     <Text Include="out3.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
+    <Text Include="in4.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="out4.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
   </ItemGroup>
 </Project>

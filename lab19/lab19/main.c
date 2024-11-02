@@ -75,7 +75,7 @@ void save(int arr[], int len, char filename[]) {
 
 void saveRandomArray() {
 	int len = 1000;
-	char filename[] = "in3.txt";
+	char filename[] = "in4.txt";
 
 	int* parr;
 	parr = (int*)malloc(sizeof(int) * len);
@@ -85,7 +85,7 @@ void saveRandomArray() {
 	}
 	
 	for (int i = 0; i < len; i++) {
-		parr[i] = rand() % 60 - 20;
+		parr[i] = rand() % 200 * 1000;
 	}
 
 	save(parr, len, filename);
@@ -142,6 +142,7 @@ void task3() {
 
 	if (count == 0) {
 		puts("no temp that is > 0 and < average, exiting task3()");
+		free(arr);
 		return;
 	}
 
@@ -166,6 +167,36 @@ void task3() {
 	free(parr);
 }
 
+void task4() {
+	int* pdata;
+	int len = load(&pdata, "in4.txt");
+
+	int max = pdata[0];
+	for (int i = 0; i < len; i++) {
+		if (pdata[i] > max) max = pdata[i];
+	}
+
+	int* pout = (int*)malloc(sizeof(int) * len);
+	if (pout == NULL) {
+		puts("Out of memory");
+		exit(EXIT_FAILURE);
+	}
+
+	double high = (double)max * 0.667;
+	int count = 0;
+	for (int i = 0; i < len; i++) {
+		if (pdata[i] >= high) {
+			pout[count] = pdata[i];
+			count++;
+		}
+	}
+
+	save(pout, count, "out4.txt");
+
+	free(pdata);
+	free(pout);
+}
+
 int main() {
 	//saveRandomArray();
 	
@@ -182,20 +213,9 @@ int main() {
 	//free(parr);
 	//parr = NULL;
 
-	task3();
+	//task3();
 
-	/*int* pa;
-	pa = (int*)malloc(sizeof(int) * 140);
-	if (pa == NULL) {
-		printf_s("Not enough memory\n");
-		exit(EXIT_FAILURE);
-	}
-
-	pa[139] = 99;
-	printf_s("%d", pa[139]);
-
-	free(pa);
-	pa = NULL;*/
+	//task4();
 
 	return 0;
 }

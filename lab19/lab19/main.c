@@ -292,31 +292,43 @@ int clip(int n, int lower, int upper) {
 	return max(lower, min(n, upper));
 }
 
-void createRandomBinFiles(int n, int minsize, int maxsize) {
-	return;
-
-	if (minsize <= 0 || maxsize >= INT_MAX || maxsize < minsize) {
-		puts("Incorrect minsize or maxsize");
+void createRandomBinFiles(int n, int size) {
+	if (size <= 0) {
+		puts("size can't be less than 1");
 		return;
 	}
 
 	for (int i = 0; i < n; i++) {
-		int size = clip(rand(), minsize, maxsize);
-
-		int* pa = (int*)malloc(size);
+		unsigned char* pa = (int*)malloc(size);
 		if (pa == NULL) {
 			puts("Out of memory");
 			exit(EXIT_FAILURE);
 		}
 
 		for (int i = 0; i < size; i++) {
-
+			pa[i] = (unsigned char)rand();
 		}
+
+		char path[_MAX_PATH];
+		sprintf_s(path, _MAX_PATH, "randbin\\bin%d", i);
+
+		FILE* file = fopen(path, "wb");
+		if (file == NULL) {
+			puts("Failed to create file");
+			exit(EXIT_FAILURE);
+		}
+
+		fwrite(pa, sizeof(unsigned char), size, file);
+
+		fclose(file);
+		free(pa);
 	}
 }
 
 int main() {
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
+	time_t start;
+	time(&start);
 
 	//saveRandomArray();
 	
@@ -338,6 +350,10 @@ int main() {
 	//task4();
 
 	//task5();
+
+	createRandomBinFiles(1, 1024*1024);
+
+	printf_s("time = %.0lf seconds", difftime(time(NULL), start));
 
 	return 0;
 }

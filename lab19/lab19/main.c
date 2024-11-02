@@ -197,6 +197,96 @@ void task4() {
 	free(pout);
 }
 
+void swap(int* arr, int i, int j) {
+	int temp = arr[i];
+	arr[i] = arr[j];
+	arr[j] = temp;
+}
+
+void bubbleSort(int arr[], int n) {
+	for (int i = 0; i < n - 1; i++) {
+
+		// Last i elements are already in place, so the loop
+		// will only num n - i - 1 times
+		for (int j = 0; j < n - i - 1; j++) {
+			if (arr[j] > arr[j + 1])
+				swap(arr, j, j + 1);
+		}
+	}
+}
+
+void task5() {
+	int* pdata;
+	int len = load(&pdata, "in5.txt");
+
+	int oddCount = 0;
+	int evenCount = 0;
+
+	for (int i = 0; i < len; i++) {
+		if (pdata[i] % 2 == 0) {
+			evenCount++;
+		}
+		else {
+			oddCount++;
+		}
+	}
+
+	if (oddCount == 0 || evenCount == 0) {
+		puts("No odds or evens, exiting task5()");
+		free(pdata);
+		return;
+	}
+
+	int* peven = (int*)malloc(sizeof(int) * (evenCount + 2));
+	if (peven == NULL) {
+		puts("Out of memory");
+		exit(EXIT_FAILURE);
+	}
+
+	int* podd = (int*)malloc(sizeof(int) * (oddCount + 2));
+	if (podd == NULL) {
+		puts("Out of memory");
+		exit(EXIT_FAILURE);
+	}
+
+	int ieven = 0, iodd = 0;
+	for (int i = 0; i < len; i++) {
+		if (pdata[i] % 2 == 0) {
+			peven[ieven] = pdata[i];
+			ieven++;
+		}
+		else {
+			podd[iodd] = pdata[i];
+			iodd++;
+		}
+	}
+
+	bubbleSort(peven, evenCount);
+	bubbleSort(podd, oddCount);
+
+	FILE* file = fopen("out5.txt", "w");
+	if (file == NULL) {
+		puts("Failed to create file");
+		exit(EXIT_FAILURE);
+	}
+
+	fprintf_s(file, "%d\n", len);
+
+	for (int i = 0; i < evenCount; i++) {
+		fprintf_s(file, "%d ", peven[i]);
+	}
+
+	for (int i = oddCount - 1; i >= 0; i--) {
+		fprintf_s(file, "%d ", podd[i]);
+	}
+
+	fclose(file);
+
+	free(pdata);
+	free(peven);
+	free(podd);
+}
+
 int main() {
 	//saveRandomArray();
 	
@@ -216,6 +306,8 @@ int main() {
 	//task3();
 
 	//task4();
+
+	task5();
 
 	return 0;
 }

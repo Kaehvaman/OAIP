@@ -134,8 +134,10 @@
     <Text Include="data.txt" />
     <Text Include="in3.txt" />
     <Text Include="in4.txt" />
+    <Text Include="in5.txt" />
     <Text Include="out3.txt" />
     <Text Include="out4.txt" />
+    <Text Include="out5.txt" />
     <Text Include="tasks12.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

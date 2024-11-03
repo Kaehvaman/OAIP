@@ -327,8 +327,8 @@ void createRandomBinFiles(int n, int size) {
 
 int main() {
 	srand((unsigned int)time(NULL));
-	time_t start;
-	time(&start);
+
+	clock_t start = clock();
 
 	//saveRandomArray();
 	
@@ -351,9 +351,9 @@ int main() {
 
 	//task5();
 
-	createRandomBinFiles(1, 1024*1024);
+	createRandomBinFiles(32, 32 * 1024);
 
-	printf_s("time = %.0lf seconds", difftime(time(NULL), start));
+	printf_s("time = %.3lf seconds", (double)(clock() - start) / (double)CLOCKS_PER_SEC);
 
 	return 0;
 }

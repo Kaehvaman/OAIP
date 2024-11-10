@@ -24,21 +24,6 @@ f2(9) returned
 f2(11) -> print(11) 
 f2(11) returned
 
-f3(11) -> print(11) 
-f3(9) -> print(9) 
-f3(7) -> print(7) 
-f3(5) -> print(5) 
-f3(3) -> print(3) 
-f3(3) && n == 3 -> print(1) 
-f3(3) -> print(3) 
-f3(3) returned 
-f3(5) -> print(5) 
-f3(5) returned 
-f3(7) -> print(7) 
-f3(7) returned 
-f3(9) -> print(9) 
-f3(9) returned 
-f3(11) -> print(11) 
 f3(11) returned
 
 recEGE1(3) && (n >= 1) == true -> print( 3) 

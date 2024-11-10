@@ -351,7 +351,7 @@ int main() {
 
 	//task5();
 
-	createRandomBinFiles(32, 32 * 1024);
+	createRandomBinFiles(32, 64 * 1024 * 1024);
 
 	printf_s("time = %.3lf seconds", (double)(clock() - start) / (double)CLOCKS_PER_SEC);
 

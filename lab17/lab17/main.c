@@ -28,19 +28,12 @@ void f2(int n, FILE* f) {
 	fprintf(f, "f2(%d) -> print(%d) \n", n, n);
 }
 
-void f3(int n, FILE* f) {
+void f3(int n) {
 	printf_s("%d ", n);
-	fprintf(f, "f3(%d) -> print(%d) \n", n, n);
-	if (n > 3) {
-		f3(n - 2, f);
-		fprintf(f, "f3(%d) returned \n", n - 2);
-	}
-	if (n == 3) {
-		printf_s("1 ");
-		fprintf(f, "f3(%d) && n == 3 -> print(%d) \n", n, 1);
+	if (n > 1) {
+		f3(n - 2);
 	}
 	printf_s("%d ", n);
-	fprintf(f, "f3(%d) -> print(%d) \n", n, n);
 }
 
 void recEGE1(int n, FILE* f) {
@@ -121,7 +114,7 @@ int main() {
 
 	fprintf(fout, "\n");
 	printf_s("\n\n");
-	f3(11, fout);
+	f3(11);
 	fprintf(fout, "f3(%d) returned\n", 11);
 
 	fprintf(fout, "\n");

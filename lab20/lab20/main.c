@@ -306,7 +306,55 @@ void task10() {
 	detectRepeats();
 }
 
-void swap(int i, int j) {
+void swap_by_next(int i, int j) {
+	if (first == NULL) {
+		puts("first == NULL, no swap happened");
+		return;
+	}
+	if (first->next == NULL) {
+		puts("first->next == NULL, no swap happened");
+		return;
+	}
+	NODE* prev_ptr = first;
+	NODE* ptr = first->next;
+
+	NODE* i_prev = prev_ptr;
+	NODE* i_ptr = ptr;
+	NODE* j_prev = prev_ptr;
+	NODE* j_ptr = ptr;
+	
+	int index = 1;
+	while (ptr != NULL) {
+		if (index == i) {
+			i_prev = prev_ptr;
+			i_ptr = ptr;
+			break;
+		}
+		prev_ptr = ptr;
+		ptr = ptr->next;
+		index++;
+	}
+	prev_ptr = first;
+	ptr = first->next;
+	index = 1;
+	while (ptr != NULL) {
+		if (index == j) {
+			j_prev = prev_ptr;
+			j_ptr = ptr;
+			break;
+		}
+		prev_ptr = ptr;
+		ptr = ptr->next;
+		index++;
+	}
+	j_prev->next = i_ptr;
+	i_prev->next = j_ptr;
+	NODE* tmp = i_ptr->next;
+	i_ptr->next = j_ptr->next;
+	j_ptr->next = tmp;
+}
+
+void swap_by_data(int i, int j) {
 	NODE* ptr = first;
 	int i_data = 0, j_data = 0;
 	int index = 0;
@@ -334,7 +382,39 @@ void swap(int i, int j) {
 	}
 }
 
-void bubbleSort() {
+NODE* getNode(int index) {
+	NODE* ptr = first;
+	int i = 0;
+	while (ptr != NULL) {
+		if (i == index) {
+			return ptr;
+		}
+		ptr = ptr->next;
+		i++;
+	}
+	puts("Node not found");
+	return NULL;
+}
+
+void bubbleSort_by_next() {
+	NODE* ptri = first;
+	int i = 0;
+	while (ptri->next != NULL) {
+		int j = 0;
+		NODE* ptrj = first;
+		while (ptrj->next != NULL) {
+			if (ptrj->data > ptrj->next->data) {
+				swap_by_data(j, j + 1);
+			}
+			j++;
+			ptrj = getNode(j);
+		}
+		i++;
+		ptri = getNode(i);
+	}
+}
+
+void bubbleSort_by_data() {
 	NODE* ptri = first;
 	int i = 0;
 	while (ptri->next != NULL) {
@@ -342,7 +422,7 @@ void bubbleSort() {
 		int j = 0;
 		while (ptrj->next != NULL) {
 			if (ptrj->data > ptrj->next->data) {
-				swap(j, j + 1);
+				swap_by_data(j, j + 1);
 			}
 			j++;
 			ptrj = ptrj->next;
@@ -356,7 +436,7 @@ void task12() {
 	printf("\n======  task12  ======\n");
 	listTemplate();
 	printNodeList();
-	swap(1, 4);
+	swap_by_next(1, 5);
 	printNodeList();
 }
 
@@ -364,7 +444,7 @@ void task13() {
 	printf("\n======  task13  ======\n");
 	listTemplate();
 	printNodeList();
-	bubbleSort();
+	bubbleSort_by_next();
 	printNodeList();
 }
 

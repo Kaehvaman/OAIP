@@ -21,11 +21,13 @@ void addToHead(int value) {
 }
 
 void printNodeList() {
+	int i = 0;
 	printf("first -> ");
 	NODE* ptr = first;
 	while (ptr != NULL) {
-		printf("(%d) -> ", ptr->data);
+		printf("(%d)[%d] -> ", ptr->data, i);
 		ptr = ptr->next;
+		i++;
 	}
 	printf("NULL\n");
 }
@@ -318,10 +320,10 @@ void swap_by_next(int i, int j) {
 	NODE* prev_ptr = first;
 	NODE* ptr = first->next;
 
-	NODE* i_prev = prev_ptr;
-	NODE* i_ptr = ptr;
-	NODE* j_prev = prev_ptr;
-	NODE* j_ptr = ptr;
+	NODE* i_prev = first;
+	NODE* i_ptr = first;
+	NODE* j_prev = first;
+	NODE* j_ptr = first->next;
 	
 	int index = 1;
 	while (ptr != NULL) {
@@ -347,8 +349,13 @@ void swap_by_next(int i, int j) {
 		ptr = ptr->next;
 		index++;
 	}
+	if (i == 0) {
+		first = j_ptr;
+	}
+	else {
+		i_prev->next = j_ptr;
+	}
 	j_prev->next = i_ptr;
-	i_prev->next = j_ptr;
 	NODE* tmp = i_ptr->next;
 	i_ptr->next = j_ptr->next;
 	j_ptr->next = tmp;
@@ -404,7 +411,7 @@ void bubbleSort_by_next() {
 		NODE* ptrj = first;
 		while (ptrj->next != NULL) {
 			if (ptrj->data > ptrj->next->data) {
-				swap_by_data(j, j + 1);
+				swap_by_next(j, j + 1);
 			}
 			j++;
 			ptrj = getNode(j);
@@ -436,7 +443,8 @@ void task12() {
 	printf("\n======  task12  ======\n");
 	listTemplate();
 	printNodeList();
-	swap_by_next(1, 5);
+	swap_by_next(0, 2);
+	swap_by_next(3, 5);
 	printNodeList();
 }
 

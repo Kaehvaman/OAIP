@@ -68,7 +68,7 @@ char* strcat_my_ptr(char* destination, const char* source) {
 	return destination;
 }
 
-char* strchr_my_arr(const char str[], int ch) {
+char* strchr_my_arr(char str[], int ch) {
 	int i = 0;
 	while (str[i] != '\0') {
 		if (str[i] == (char)ch) {
@@ -79,7 +79,7 @@ char* strchr_my_arr(const char str[], int ch) {
 	return NULL;
 }
 
-char* strchr_my_ptr(const char* str, int ch) {
+char* strchr_my_ptr(char* str, int ch) {
 	while (*str != '\0') {
 		if (*str == (char)ch) {
 			return str;

@@ -1,0 +1,42 @@
+#include <stdio.h>
+#define BUF_LEN 128
+
+void task1() {
+%puts("===== task1 =====");
+
+%char infilepath[] = "files/text1.txt";
+%FILE* fin = fopen(infilepath, "r");
+%if (fin == NULL) {
+%%printf("Cannot open file %s\n", infilepath);
+%%return;
+%}
+
+%char outfilepath[] = "files/out1.txt";
+%FILE* fout = fopen(outfilepath, "w");
+%if (fin == NULL) {
+%%printf("Cannot open file %s\n", outfilepath);
+%%return;
+%}
+
+%char buf[BUF_LEN];
+%while (fgets(buf, BUF_LEN, fin) != NULL) {
+%%for (int i = 0; buf[i] != '\0'; i++) {
+%%%if (buf[i] == '\t') {
+%%%%buf[i] = '%';
+%%%}
+%%}
+%%fprintf(fout, "%s", buf);
+%%printf(">>%s<<", buf);
+%}
+%fclose(fin);
+%fclose(fout);
+}
+
+int main() {
+
+%task1();
+
+
+
+%return 0;
+}

@@ -19,4 +19,36 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="files\out1.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="files\text1.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="files\out2.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="files\text2.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="files\out3.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="files\text3.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="files\out4.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="files\text4.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="files\out5.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="files\text5.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

@@ -1,0 +1,42 @@
+_include _stdio_h_
+_define BUF_LEN 128
+
+void task1__ _
+	puts_______ task1 ________
+
+	char infilepath__ _ _files_text1_txt__
+	FILE_ fin _ fopen_infilepath_ _r___
+	if _fin __ NULL_ _
+		printf__Cannot open file _s_n__ infilepath__
+		return_
+	_
+
+	char outfilepath__ _ _files_out1_txt__
+	FILE_ fout _ fopen_outfilepath_ _w___
+	if _fin __ NULL_ _
+		printf__Cannot open file _s_n__ outfilepath__
+		return_
+	_
+
+	char buf_BUF_LEN__
+	while _fgets_buf_ BUF_LEN_ fin_ __ NULL_ _
+		for _int i _ 0_ buf_i_ __ __0__ i___ _
+			if _buf_i_ __ __t__ _
+				buf_i_ _ ____
+			_
+		_
+		fprintf_fout_ __s__ buf__
+		printf_____s____ buf__
+	_
+	fclose_fin__
+	fclose_fout__
+_
+
+int main__ _
+
+	task1___
+
+
+
+	return 0_
+_

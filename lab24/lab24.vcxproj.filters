@@ -19,4 +19,20 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="files\out1.html">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
+    <None Include="files\out2.html">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="files\text1.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="files\text2.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

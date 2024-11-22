@@ -3,45 +3,9 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include "../string_my/string_my.h"
 
 #define BUFLEN 128
-
-int getNextDelim(FILE* file, int* token) {
-	int ch = getc(file);
-	if (ch == EOF) {
-		return 0;
-	}
-
-	if (isalnum(ch)) {
-		ungetc(ch, file);
-		return 0;
-	}
-
-	*token = ch;
-	return 1;
-}
-
-int getNextWord(FILE* file, char token[], int len) {
-	int ch;
-	int i = 0;
-	while ((ch = getc(file)) != EOF && (i < len - 1)) {
-		if (isalnum(ch)) {
-			token[i] = ch;
-		}
-		else {
-			break;
-		}
-		i += 1;
-	}
-	ungetc(ch, file);
-	token[i] = '\0';
-	if (i == 0) {
-		return 0;
-	}
-	else {
-		return 1;
-	}
-}
 
 void task1() {
 	FILE* fin = fopen("files/text1.txt", "r");

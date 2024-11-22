@@ -2,6 +2,8 @@
 #include <string.h>
 #include <locale.h>
 #include <Windows.h>
+#include "../../string_my/string_my.h"
+
 
 void task1() {
 	printf("task1 Введите символ: ");
@@ -95,19 +97,6 @@ void task6_1() {
 	}
 
 	printf("Строка после обработки: \"%s\"\n", str);
-}
-
-char toupperMY(char ch) {
-	if (ch >= 'a' && ch <= 'z') {
-		return 'A' + (ch - 'a');
-	}
-	if (ch >= 'а' && ch <= 'я') {
-		return 'А' + (ch - 'а');
-	}
-	if (ch == 'ё') {
-		return 'Ё';
-	}
-	return ch;
 }
 
 void task6_2() {

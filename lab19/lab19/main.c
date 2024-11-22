@@ -299,13 +299,16 @@ void createRandomBinFiles(int n, int size) {
 	}
 
 	for (int i = 0; i < n; i++) {
-		unsigned char* pa = (int*)malloc(size);
+		unsigned char* pa = malloc(size);
 		if (pa == NULL) {
 			puts("Out of memory");
 			exit(EXIT_FAILURE);
 		}
 
 		for (int i = 0; i < size; i++) {
+			if (i % 256 == 0) {
+				srand((unsigned int)(clock() * time(NULL)));
+			}
 			pa[i] = (unsigned char)rand();
 		}
 
@@ -326,7 +329,6 @@ void createRandomBinFiles(int n, int size) {
 }
 
 int main() {
-	srand((unsigned int)time(NULL));
 
 	clock_t start = clock();
 
@@ -351,7 +353,7 @@ int main() {
 
 	//task5();
 
-	createRandomBinFiles(32, 64 * 1024 * 1024);
+	createRandomBinFiles(128, 64 * 1024 * 1024);
 
 	printf_s("time = %.3lf seconds", (double)(clock() - start) / (double)CLOCKS_PER_SEC);
 

@@ -1,4 +1,13 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "SortStringArray.h"
+
+// Слова, загруженные из файла 
+char words[MAX_WORDS][MAX_LEN_WORD];
+// Количество слов в массиве
+int n = 0;
+// Массив для сортировки 
+char a[MAX_WORDS][MAX_LEN_WORD];
+
 
 int LoadWords(char* filename) {
 	// открыть файл
@@ -38,7 +47,6 @@ void CopyWordsToA() {
 	for (int i = 0; i < n; i++) {
 		strcpy(a[i], words[i]);
 	}
-
 }
 
 int ArraysAreEqual() {
@@ -74,7 +82,7 @@ void swapWords(char a[], char b[]) {
 	char tmp[MAX_LEN_WORD];
 	strcpy(tmp, a);
 	strcpy(a, b);
-	strcpy(a, tmp);
+	strcpy(b, tmp);
 }
 
 int isSortedStringArray(char a[MAX_WORDS][MAX_LEN_WORD]) {
@@ -162,70 +170,81 @@ void InsertionSortStrings() {
 	}
 }
 
-/**
- * Сортирует массив, используя рекурсивную сортировку слиянием
- * up - указатель на массив, который нужно сортировать
- * down - указатель на массив с, как минимум, таким же размером как у 'up', используется как буфер
- * left - левая граница массива, передайте 0, чтобы сортировать массив с начала
- * right - правая граница массива, передайте длину массива - 1, чтобы сортировать массив до последнего элемента
- * возвращает: указатель на отсортированный массив. Из-за особенностей работы данной реализации
- * отсортированная версия массива может оказаться либо в 'up', либо в 'down'
- **/
-char* MergeSortStrings(char* up, char* down, unsigned int left, unsigned int right) {
+// Merges two subarrays of arr[].
+// First subarray is arr[l..m]
+// Second subarray is arr[m+1..r]
+void merge(char arr[MAX_WORDS][MAX_LEN_WORD], int l, int m, int r)
+{
+	int i, j, k;
+	int n1 = m - l + 1;
+	int n2 = r - m;
 
-	if (left == right)
-	{
-		strcpy(down[left], up[left]);
-		return down;
+	// Create temp arrays
+	char L[MAX_WORDS][MAX_LEN_WORD], R[MAX_WORDS][MAX_LEN_WORD];
+
+	// Copy data to temp arrays L[] and R[]
+	for (i = 0; i < n1; i++) {
+		strcpy(L[i], arr[l + i]);
+	}
+	for (j = 0; j < n2; j++) {
+		strcpy(R[i], arr[m + 1 + j]);
 	}
 
-	unsigned int middle = left + (right - left) / 2;
-
-	// разделяй и сортируй
-	char* l_buff = MergeSortStrings(up, down, left, middle);
-	char* r_buff = MergeSortStrings(up, down, middle + 1, right);
-
-	// слияние двух отсортированных половин
-	char* target = (l_buff == up) ? down : up;
-
-	unsigned int l_cur = left, r_cur = middle + 1;
-	for (unsigned int i = left; i <= right; i++)
-	{
-		if (l_cur <= middle && r_cur <= right)
-		{
-			if (strcmp(l_buff[l_cur], r_buff[r_cur]) < 0)
-			{
-				strcpy(target[i], l_buff[l_cur]);
-				l_cur++;
-			}
-			else
-			{
-				strcpy(target[i], r_buff[r_cur]);
-				r_cur++;
-			}
+	// Merge the temp arrays back into arr[l..r
+	i = 0;
+	j = 0;
+	k = l;
+	while (i < n1 && j < n2) {
+		if (L[i] <= R[j]) {
+			strcpy(arr[k], L[i]);
+			i++;
 		}
-		else if (l_cur <= middle)
-		{
-			strcpy(target[i], l_buff[l_cur]);
-			l_cur++;
+		else {
+			strcpy(arr[k], R[j]);
+			j++;
 		}
-		else
-		{
-			strcpy(target[i], r_buff[r_cur]);
-			r_cur++;
-		}
+		k++;
 	}
-	return target;
+
+	// Copy the remaining elements of L[],
+	// if there are any
+	while (i < n1) {
+		strcpy(arr[k], L[i]);
+		i++;
+		k++;
+	}
+
+	// Copy the remaining elements of R[],
+	// if there are any
+	while (j < n2) {
+		strcpy(arr[k], R[j]);
+		j++;
+		k++;
+	}
 }
 
-void ShellSort(char* array, int size) {
-	for (int s = size / 2; s > 0; s /= 2) {
-		for (int i = s; i < size; ++i) {
-			for (int j = i - s; j >= 0 && strcmp(array[j], array[j + s]) > 0; j -= s) {
+// l is for left index and r is right index of the
+// sub-array of arr to be sorted
+void MergeSortStrings(char arr[MAX_WORDS][MAX_LEN_WORD], int l, int r){
+	if (l < r) {
+		int m = l + (r - l) / 2;
+
+		// Sort first and second halves
+		MergeSortStrings(arr, l, m);
+		MergeSortStrings(arr, m + 1, r);
+
+		merge(arr, l, m, r);
+	}
+}
+
+void ShellSort() {
+	for (int s = MAX_WORDS / 2; s > 0; s /= 2) {
+		for (int i = s; i < MAX_WORDS; ++i) {
+			for (int j = i - s; j >= 0 && strcmp(a[j], a[j + s]) > 0; j -= s) {
 				char tmp[MAX_LEN_WORD];
-				strcpy(tmp, array[j]);
-				strcpy(array[j], array[j + s]);
-				strcpy(array[j + s], tmp);
+				strcpy(tmp, a[j]);
+				strcpy(a[j], a[j + s]);
+				strcpy(a[j + s], tmp);
 			}
 		}
 	}

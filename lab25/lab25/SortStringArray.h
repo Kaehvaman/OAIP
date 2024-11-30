@@ -9,12 +9,13 @@
 // Максимальное количество слов
 #define MAX_WORDS 20000
 
+extern int n;
 // Слова, загруженные из файла 
 extern char words[MAX_WORDS][MAX_LEN_WORD];
-// Количество слов в массиве
-extern int n = 0;
 // Массив для сортировки 
 extern char a[MAX_WORDS][MAX_LEN_WORD];
+
+
 
 int LoadWords(char* filename);
 void CopyWordsToA();
@@ -26,8 +27,8 @@ void SelectionSortStrings();
 void QuickSortStrings();
 void BubbleSortStrings();
 void InsertionSortStrings();
-char* MergeSortStrings(char* up, char* down, unsigned int left, unsigned int right);
-void ShellSort(char* array, int size);
+void MergeSortStrings(char arr[MAX_WORDS][MAX_LEN_WORD], int l, int r);
+void ShellSort();
 
 int LinearSearchStrings(char target[], char source[MAX_WORDS][MAX_LEN_WORD]);
 int BinarySearchStrings(char target[], char source[MAX_WORDS][MAX_LEN_WORD]);

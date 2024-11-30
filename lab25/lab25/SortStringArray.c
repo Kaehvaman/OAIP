@@ -71,6 +71,13 @@ int ArraysAreEqual() {
 
 	for (int i = 0; i < n; i++) {
 		if (counts_in_words[i] != counts_in_a[i]) {
+			printf("-----------\n");
+			for (int i = 0; i < MAX_WORDS; i++) {
+				if (1 || a[i][0] != '\0') {
+					printf("%d) %s\n", counts_in_a[i], a[i]);
+				}
+			}
+			printf("-----------\n");
 			return 0;
 		}
 	}
@@ -160,7 +167,7 @@ void BubbleSortStrings() {
 
 void InsertionSortStrings() {
 	int i = 1;
-	while (i < MAX_WORDS) {
+	while (i < n) {
 		int j = i;
 		while (j > 0 && strcmp(a[j - 1], a[j]) > 0) {
 			swapWords(a[j], a[j - 1]);
@@ -171,75 +178,75 @@ void InsertionSortStrings() {
 }
 
 // Merges two subarrays of arr[].
-// First subarray is arr[l..m]
-// Second subarray is arr[m+1..r]
-void merge(char arr[MAX_WORDS][MAX_LEN_WORD], int l, int m, int r)
-{
+// First subarray is arr[left..mid]
+// Second subarray is arr[mid+1..right]
+void merge(char arr[MAX_WORDS][MAX_LEN_WORD], int left, int mid, int right) {
 	int i, j, k;
-	int n1 = m - l + 1;
-	int n2 = r - m;
+	int n1 = mid - left + 1;
+	int n2 = right - mid;
 
-	// Create temp arrays
-	char L[MAX_WORDS][MAX_LEN_WORD], R[MAX_WORDS][MAX_LEN_WORD];
+	// Create temporary arrays
+	static char leftArr[MAX_WORDS][MAX_LEN_WORD];
+	static char rightArr[MAX_WORDS][MAX_LEN_WORD];
 
-	// Copy data to temp arrays L[] and R[]
+	// Copy data to temporary arrays
 	for (i = 0; i < n1; i++) {
-		strcpy(L[i], arr[l + i]);
+		strcpy(leftArr[i], arr[left + i]);
 	}
 	for (j = 0; j < n2; j++) {
-		strcpy(R[i], arr[m + 1 + j]);
+		strcpy(rightArr[j], arr[mid + 1 + j]);
 	}
 
-	// Merge the temp arrays back into arr[l..r
+	// Merge the temporary arrays back into arr[left..right]
 	i = 0;
 	j = 0;
-	k = l;
+	k = left;
 	while (i < n1 && j < n2) {
-		if (L[i] <= R[j]) {
-			strcpy(arr[k], L[i]);
+		if (strcmp(leftArr[i], rightArr[j]) <= 0) {
+			strcpy(arr[k], leftArr[i]);
 			i++;
 		}
 		else {
-			strcpy(arr[k], R[j]);
+			strcpy(arr[k], rightArr[j]);
 			j++;
 		}
 		k++;
 	}
 
-	// Copy the remaining elements of L[],
-	// if there are any
+	// Copy the remaining elements of leftArr[], if any
 	while (i < n1) {
-		strcpy(arr[k], L[i]);
+		strcpy(arr[k], leftArr[i]);
 		i++;
 		k++;
 	}
 
-	// Copy the remaining elements of R[],
-	// if there are any
+	// Copy the remaining elements of rightArr[], if any
 	while (j < n2) {
-		strcpy(arr[k], R[j]);
+		strcpy(arr[k], rightArr[j]);
 		j++;
 		k++;
 	}
 }
 
-// l is for left index and r is right index of the
-// sub-array of arr to be sorted
-void MergeSortStrings(char arr[MAX_WORDS][MAX_LEN_WORD], int l, int r){
-	if (l < r) {
-		int m = l + (r - l) / 2;
+// The subarray to be sorted is in the index range [left-right]
+void MergeSortStrings(char arr[MAX_WORDS][MAX_LEN_WORD], int left, int right) {
+	if (left < right) {
+
+		// Calculate the midpoint
+		int mid = left + (right - left) / 2;
 
 		// Sort first and second halves
-		MergeSortStrings(arr, l, m);
-		MergeSortStrings(arr, m + 1, r);
+		MergeSortStrings(arr, left, mid);
+		MergeSortStrings(arr, mid + 1, right);
 
-		merge(arr, l, m, r);
+		// Merge the sorted halves
+		merge(arr, left, mid, right);
 	}
 }
 
 void ShellSort() {
-	for (int s = MAX_WORDS / 2; s > 0; s /= 2) {
-		for (int i = s; i < MAX_WORDS; ++i) {
+	for (int s = n / 2; s > 0; s /= 2) {
+		for (int i = s; i < n; ++i) {
 			for (int j = i - s; j >= 0 && strcmp(a[j], a[j + s]) > 0; j -= s) {
 				char tmp[MAX_LEN_WORD];
 				strcpy(tmp, a[j]);

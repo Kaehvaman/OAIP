@@ -15,8 +15,6 @@ extern char words[MAX_WORDS][MAX_LEN_WORD];
 // Массив для сортировки 
 extern char a[MAX_WORDS][MAX_LEN_WORD];
 
-
-
 int LoadWords(char* filename);
 void CopyWordsToA();
 int ArraysAreEqual();
@@ -27,8 +25,8 @@ void SelectionSortStrings();
 void QuickSortStrings();
 void BubbleSortStrings();
 void InsertionSortStrings();
-void MergeSortStrings(char arr[MAX_WORDS][MAX_LEN_WORD], int l, int r);
 void ShellSort();
+void MergeSortStrings(char arr[MAX_WORDS][MAX_LEN_WORD], int left, int right);
 
 int LinearSearchStrings(char target[], char source[MAX_WORDS][MAX_LEN_WORD]);
 int BinarySearchStrings(char target[], char source[MAX_WORDS][MAX_LEN_WORD]);

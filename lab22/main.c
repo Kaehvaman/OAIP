@@ -44,6 +44,7 @@ int main() {
 	printf("strchr_my_arr_res 's' = {%p} = '%c', index = %d\n", strchr_my_arr_res, *strchr_my_arr_res, (int)(strchr_my_arr_res - test3));
 	char* strchr_my_arr_ptr = strchr_my_ptr(test3, 's');
 	printf("strchr_my_arr_ptr 's' = {%p} = '%c', index = %d\n", strchr_my_arr_ptr, *strchr_my_arr_ptr, (int)(strchr_my_arr_ptr - test3));
+	char dest[10];
 
 	return 0;
 }

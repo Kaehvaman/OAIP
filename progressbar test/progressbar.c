@@ -9,7 +9,7 @@ static unsigned get_to_print(unsigned current, unsigned max) {
 	return progressbar_width * current / max;
 }
 
-static unsigned get_percentage(unsigned current, unsigned max) {
+unsigned get_percentage(unsigned current, unsigned max) {
 	return 100 * current / max;
 }
 

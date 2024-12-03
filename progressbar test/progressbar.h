@@ -17,4 +17,6 @@ void progressbar_inc(struct progressbar *pb);
 // clear line of progress bar
 void progressbar_clear();
 
+unsigned get_percentage(unsigned current, unsigned max);
+
 #endif

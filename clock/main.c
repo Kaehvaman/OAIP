@@ -12,7 +12,7 @@ void wait(int seconds) {
 	clock_t t0 = clock();
 	clock_t t1;
 	while ((int)(((t1 = clock()) - t0) / CLOCKS_PER_SEC) < seconds) {
-		Sleep(50);
+		Sleep(1000);
 	}
 	printf(" wait for %d s is over, clock=%d", seconds, (int)t1);
 }
@@ -24,27 +24,64 @@ int main() {
 	#endif
 	
 	struct progressbar pb;
-	int n = 5, sl = 1;
-	printf(HIDE_CURSOR); 
+	int n = 10, sl = 1;
+	printf(HIDE_CURSOR);
+	printf("\033[385;31m");
 	progressbar_start(&pb, n * sl);
 	
 	clock_t start = clock();
 	
-	for (int i = 0; i < n; i++) {
+	for (int i = 1; i <= n; i++) {
+		int percentage = 100 * i / n;
+		if (percentage < 33) {
+			printf("\033[385;31m");
+		}
+		else if (33 < percentage && percentage < 66) {
+			printf("\033[385;33m");
+		}
+		else {
+			printf("\033[385;32m");
+		}
 		wait(sl);
 		//printf("%d\n", i);
 		progressbar_add(&pb, sl);
 	}
 	//progressbar_clear();
+	printf("\033[0m");
 	printf(SHOW_CURSOR);
 	printf("\n");
 	printf_s("time = %.3lf seconds\nexpected %d seconds\n", (double)(clock() - start) / (double)CLOCKS_PER_SEC, n * sl);
-	
-	progressbar_start(&pb, n * sl);
-	for (int i = 0; i < n; i++) {
-		wait(sl);
-		//printf("%d\n", i);
-		progressbar_add(&pb, sl);
+
+	int count = 0;
+	for (int i = 40; i <= 47; i++) {
+		printf("\033[385;%dm", i);
+		for (int j = 30; j <= 37; j++) {
+			printf("\033[385;%dm", j);
+			printf("%2X ", count);
+			count++;
+		}
+		for (int j = 90; j <= 97; j++) {
+			printf("\033[385;%dm", j);
+			printf("%2X ", count);
+			count++;
+		}
+		printf("\n");
 	}
+	for (int i = 100; i <= 107; i++) {
+		printf("\033[385;%dm", i);
+		for (int j = 30; j <= 37; j++) {
+			printf("\033[385;%dm", j);
+			printf("%2X ", count);
+			count++;
+		}
+		for (int j = 90; j <= 97; j++) {
+			printf("\033[385;%dm", j);
+			printf("%2X ", count);
+			count++;
+		}
+		printf("\n");
+	}
+	printf("\033[0m");
+
 	return 0;
 }

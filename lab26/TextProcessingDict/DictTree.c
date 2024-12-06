@@ -2,12 +2,12 @@
 // Реализация словаря на двоичном дереве поиска
 // 
 
-#ifdef DICT_TREE_C
-
 #define _CRT_SECURE_NO_WARNINGS
 #include <string.h>
 #include <stdlib.h>
 #include "Dict.h"
+
+#ifdef DICT_TREE_C
 
 // Узел дерева 
 struct NodeTree {

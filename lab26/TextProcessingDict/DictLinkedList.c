@@ -1,5 +1,3 @@
-#ifdef DICT_LINKED_LIST_C
-
 //
 // Реализация АТД «Словарь» на Структуре данных «Односвязанный список»
 // 
@@ -9,6 +7,7 @@
 
 #include "Dict.h"
 
+#ifdef DICT_LINKED_LIST_C
 
 // элемент односвязанного списка
 struct Node {

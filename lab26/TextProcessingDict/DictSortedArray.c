@@ -1,8 +1,9 @@
-#ifdef DICT_SORTED_ARRAY_C
-
 #define _CRT_SECURE_NO_WARNINGS
 #include <string.h>
+#include <stdlib.h>
 #include "Dict.h"
+
+#ifdef DICT_SORTED_ARRAY_C
 
 #define MAX_WORDS 10000
 
@@ -48,6 +49,15 @@ MEMBER Ц сообщает, €вл€етс€ ли указанный элемент членом данного множества или не
 */
 int  Member(char* word) {
 	// »спользуетс€ алгоритм бинарного поиска слова в отсортированном массиве
+	
+	if (bsearch(word, words, numWords, sizeof(char), strcmp)) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+
+	/*
 	int left = 0;
 	int right = numWords - 1;
 
@@ -65,7 +75,7 @@ int  Member(char* word) {
 			right = middle - 1;
 		}
 	}
-	return 0;
+	return 0;*/
 }
 
 #endif

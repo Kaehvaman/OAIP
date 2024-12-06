@@ -1,6 +1,6 @@
 #pragma once
 
-#define DICT_ARRAY_C
+#define DICT_TREE_C
 
 /*
 ќсновные операции —Ћќ¬ј–я:

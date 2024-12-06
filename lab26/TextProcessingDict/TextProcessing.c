@@ -119,7 +119,7 @@ int TextProcessing(char* filenameIn, char* filenameOut) {
 	fprintf(fout, "<!DOCTYPE html>");
 	fprintf(fout, "<html>");
 	fprintf(fout, "<head>");
-	fprintf(fout, "<meta http-equiv = \"Content-Type\" content = \"text/html; charset=сз1251\" />");
+	fprintf(fout, "<meta http-equiv = \"Content-Type\" content = \"text/html; charset=cp1251\" />");
 	fprintf(fout, "<title>HTML Document</title>");
 	fprintf(fout, "</head>");
 	fprintf(fout, "<body>");

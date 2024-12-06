@@ -33,9 +33,21 @@
     <ClCompile Include="DictArray.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\hash functions\fnvhash_32a.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\hash functions\jhash.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dict.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\hash functions\fnvhash_32a.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\hash functions\jhash.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

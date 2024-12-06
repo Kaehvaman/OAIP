@@ -1,20 +1,25 @@
 //
 // Реализация словаря на хэше
 // 
-
-#ifdef DICT_HASH_C
-
 #define _CRT_SECURE_NO_WARNINGS
 #include <string.h>
 #include <stdlib.h>
 #include "Dict.h"
+#include "fnvhash_32a.h"
+#include "jhash.h"
 
-#define MAX_HASH 13267
+#ifdef DICT_HASH_C
 
 struct Node {
 	char* word;
 	struct Node* next;
 };
+
+#define FNV_HASH
+
+#if defined VLASENKO_HASH
+
+#define MAX_HASH 13267
 
 // Массив списков
 struct Node* first[MAX_HASH];
@@ -29,6 +34,31 @@ int hash(char* word) {
 	}
 	return hash_value % MAX_HASH;
 }
+
+#elif defined JHASH
+
+#define MAX_HASH 16384
+
+// Массив списков
+struct Node* first[MAX_HASH];
+
+int hash(char* word) {
+	int hash_value = (int)jhash(word, strlen(word) + 1, FNV1_32A_INIT);
+	hash_value = hash_value & hashmask(14);
+}
+
+#elif defined FNV_HASH
+#define MAX_HASH 16384
+
+// Массив списков
+struct Node* first[MAX_HASH];
+
+int hash(char* word) {
+	int hash_value = (int)fnv_32a_str(word, FNV1_32A_INIT);
+	hash_value = TINY_FNV(14, hash_value);
+}
+
+#endif
 
 /* INSERT – добавляет элемент в множество.
 Множество – содержит только уникальные элементы.

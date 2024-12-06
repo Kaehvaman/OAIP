@@ -1,6 +1,8 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <time.h>
 #include <Windows.h>
+#include <stdlib.h>
 #include "../progressbar test/progressbar.h"
 
 // \033[ = CSI, CSI ?25l hides the cursor, CSI ?25h shows the cursor
@@ -22,9 +24,9 @@ int main() {
 	#ifdef WIN32
 	printf("ITS WINDOWS!\n");
 	#endif
-	
+
 	struct progressbar pb;
-	int n = 10, sl = 1;
+	int n = 1, sl = 1;
 	printf(HIDE_CURSOR);
 	printf("\033[385;31m");
 	progressbar_start(&pb, n * sl);
@@ -57,12 +59,12 @@ int main() {
 		printf("\033[385;%dm", i);
 		for (int j = 30; j <= 37; j++) {
 			printf("\033[385;%dm", j);
-			printf("%2X ", count);
+			printf("%02X ", count);
 			count++;
 		}
 		for (int j = 90; j <= 97; j++) {
 			printf("\033[385;%dm", j);
-			printf("%2X ", count);
+			printf("%02X ", count);
 			count++;
 		}
 		printf("\n");
@@ -71,12 +73,12 @@ int main() {
 		printf("\033[385;%dm", i);
 		for (int j = 30; j <= 37; j++) {
 			printf("\033[385;%dm", j);
-			printf("%2X ", count);
+			printf("%02X ", count);
 			count++;
 		}
 		for (int j = 90; j <= 97; j++) {
 			printf("\033[385;%dm", j);
-			printf("%2X ", count);
+			printf("%02X ", count);
 			count++;
 		}
 		printf("\n");

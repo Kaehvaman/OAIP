@@ -8,7 +8,7 @@
 #include "fnvhash_32a.h"
 #include "jhash.h"
 
-#ifdef DICT_HASH_C
+#ifdef DICT_HASH_CHAIN_C
 
 struct Node {
 	char* word;
@@ -43,8 +43,9 @@ int hash(char* word) {
 struct Node* first[MAX_HASH];
 
 int hash(char* word) {
-	int hash_value = (int)jhash(word, strlen(word) + 1, FNV1_32A_INIT);
+	int hash_value = (int)jhash(word, (ub4)strlen(word) + 1, FNV1_32A_INIT);
 	hash_value = hash_value & hashmask(14);
+	return hash_value;
 }
 
 #elif defined FNV_HASH
@@ -56,6 +57,7 @@ struct Node* first[MAX_HASH];
 int hash(char* word) {
 	int hash_value = (int)fnv_32a_str(word, FNV1_32A_INIT);
 	hash_value = TINY_FNV(14, hash_value);
+	return hash_value;
 }
 
 #endif

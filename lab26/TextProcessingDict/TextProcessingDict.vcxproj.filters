@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DictHash.c">
+    <ClCompile Include="DictHashChain.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="DictLinkedList.c">
@@ -37,6 +37,9 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="..\..\hash functions\jhash.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="DictHashOpenAddress.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

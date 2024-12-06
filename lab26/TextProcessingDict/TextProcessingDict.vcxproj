@@ -132,7 +132,8 @@
     <ClCompile Include="..\..\hash functions\fnvhash_32a.c" />
     <ClCompile Include="..\..\hash functions\jhash.c" />
     <ClCompile Include="DictArray.c" />
-    <ClCompile Include="DictHash.c" />
+    <ClCompile Include="DictHashChain.c" />
+    <ClCompile Include="DictHashOpenAddress.c" />
     <ClCompile Include="DictLinkedList.c" />
     <ClCompile Include="DictSortedArray.c" />
     <ClCompile Include="DictTree.c" />

@@ -6,6 +6,7 @@
 
 #include "jhash.h"
 #include "fnvhash_32a.h"
+#include "crc.h"
 
 // Assumes little endian
 void printBits(size_t const size, void const* const ptr) {

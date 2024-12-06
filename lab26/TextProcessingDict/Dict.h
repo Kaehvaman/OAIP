@@ -1,6 +1,7 @@
 #pragma once
 
-#define DICT_TREE_C
+#define DICT_HASH_OPEN_ADDRESS_C
+#define DICT_HASH_CHAIN_C
 
 /*
 ќсновные операции —Ћќ¬ј–я:

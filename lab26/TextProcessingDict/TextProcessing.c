@@ -15,7 +15,7 @@ char filenameDict[MAX_PATH] = "../Dictionaries/dict0.txt";
 char filenameIn[MAX_PATH] = "../Texts/Alice.txt";
 char filenameOut[MAX_PATH] = "out/Alice_out.html";
 
-double results[3][12];
+double results[3][15];
 
 void test(int i, int j) {
 	// сообщаем какие файлы обрабатываются
@@ -36,13 +36,13 @@ void test(int i, int j) {
 }
 
 void test_dicts(int i) {
-	for (int j = 0; j < 4; j++) {
+	for (int j = 0; j < 5; j++) {
 		sprintf(filenameDict, "../Dictionaries/dict%d.txt", j);
 		test(i, j);
 		sprintf(filenameDict, "../Dictionaries/dict%da.txt", j);
-		test(i, j+4);
+		test(i, j + 5);
 		sprintf(filenameDict, "../Dictionaries/dict%db.txt", j);
-		test(i, j+8);
+		test(i, j + 10);
 	}
 }
 
@@ -58,7 +58,7 @@ int main() {
 	test_dicts(2);
 
 	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 12; j++) {
+		for (int j = 0; j < 15; j++) {
 			printf("%7.3lf ", results[i][j]);
 		}
 		printf("\n");

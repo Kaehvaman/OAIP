@@ -23,7 +23,7 @@ char filenameOut[MAX_PATH] = "out/Alice_out.html";
 
 void test(char filenameDict[], char filenameIn[], char filenameOut[]) {
 	// сообщаем какие файлы обрабатываются
-	printf("HTML file %s\nis created from text file %s\nwith highlighting words from %s\ndictionary\n\n\n",
+	printf("HTML file %s\nis created from text file %s\nwith highlighting words from %s\ndictionary\n\n",
 		filenameOut, filenameIn, filenameDict);
 
 	// t0 - сколько прошло времени от старта программы до момента входа в функцию main()
@@ -46,7 +46,7 @@ void test(char filenameDict[], char filenameIn[], char filenameOut[]) {
 
 	printf("t1 - t0 = %.3f sec (Run time of dictionary loading)\n", (t1 - t0) / (float)CLOCKS_PER_SEC);
 	printf("t2 - t1 = %.3f sec (Run time of HTML generating)\n", (t2 - t1) / (float)CLOCKS_PER_SEC);
-	printf("t3 - t2 = %.3f sec (Run time of dictionary destroying )\n\n", (t2 - t1) / (float)CLOCKS_PER_SEC);
+	printf("t3 - t2 = %.3f sec (Run time of dictionary destroying )\n\n\n", (t2 - t1) / (float)CLOCKS_PER_SEC);
 }
 
 int main() {
@@ -54,13 +54,34 @@ int main() {
 	//char filenameIn[MAX_PATH] = "../Texts/Alice.txt";
 	//char filenameOut[MAX_PATH] = "out/Alice_out.html";
 
-	for (int i = 0; i < 4; i++) {
-		sprintf(filenameDict, "../Dictionaries/dict%d.txt", i);
+	for (int i = 0; i < 1; i++) {
+		/*sprintf(filenameDict, "../Dictionaries/dict%d.txt", i);
 		test(filenameDict, filenameIn, filenameOut);
 		sprintf(filenameDict, "../Dictionaries/dict%da.txt", i);
 		test(filenameDict, filenameIn, filenameOut);
 		sprintf(filenameDict, "../Dictionaries/dict%db.txt", i);
+		test(filenameDict, filenameIn, filenameOut);*/
+
+		strcpy(filenameIn, "../Texts/Tolkien.txt");
+		strcpy(filenameOut, "out/Tolkien_out.html");
+
+		sprintf(filenameDict, "../Dictionaries/dict0.txt");
 		test(filenameDict, filenameIn, filenameOut);
+		sprintf(filenameDict, "../Dictionaries/dict0a.txt");
+		test(filenameDict, filenameIn, filenameOut);
+		sprintf(filenameDict, "../Dictionaries/dict0b.txt");
+		test(filenameDict, filenameIn, filenameOut);
+
+		strcpy(filenameIn, "../Texts/Tolkien2.txt");
+		strcpy(filenameOut, "out/Tolkien2_out.html");
+
+		sprintf(filenameDict, "../Dictionaries/dict0.txt");
+		test(filenameDict, filenameIn, filenameOut);
+		sprintf(filenameDict, "../Dictionaries/dict0a.txt");
+		test(filenameDict, filenameIn, filenameOut);
+		sprintf(filenameDict, "../Dictionaries/dict0b.txt");
+		test(filenameDict, filenameIn, filenameOut);
+
 	}
 	return 0;
 }

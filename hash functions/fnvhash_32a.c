@@ -72,27 +72,19 @@
  * NOTE: To use the recommended 32 bit FNV-1a hash, use FNV1_32A_INIT as the
  * 	 hval arg on the first call to either fnv_32a_buf() or fnv_32a_str().
  */
-Fnv32_t fnv_32a_buf(void *buf, size_t len, Fnv32_t hval)
-{
+unsigned int fnv_32a_buf(void *buf, size_t len, unsigned int hval) {
 	unsigned char *bp = (unsigned char *)buf;	/* start of buffer */
-	unsigned char *be = bp + len;		/* beyond end of buffer */
+	unsigned char *be = bp + len;				/* beyond end of buffer */
 
-	/*
-	 * FNV-1a hash each octet in the buffer
-	 */
+	// FNV-1a hash each octet in the buffer
 	while (bp < be) {
-
-	/* xor the bottom with the current octet */
-	hval ^= (Fnv32_t)*bp++;
-
-	/* multiply by the 32 bit FNV magic prime mod 2^32 */
-	hval *= FNV_32_PRIME;
+		// xor the bottom with the current octet
+		hval ^= (unsigned int)*bp++;
+		// multiply by the 32 bit FNV magic prime mod 2^32
+		hval *= FNV_32_PRIME;
 	}
-
-	/* return our new hash value */
 	return hval;
 }
-
 
 /*
  * fnv_32a_str - perform a 32 bit Fowler/Noll/Vo FNV-1a hash on a string
@@ -107,23 +99,15 @@ Fnv32_t fnv_32a_buf(void *buf, size_t len, Fnv32_t hval)
  * NOTE: To use the recommended 32 bit FNV-1a hash, use FNV1_32A_INIT as the
  *  	 hval arg on the first call to either fnv_32a_buf() or fnv_32a_str().
  */
-Fnv32_t fnv_32a_str(char *str, Fnv32_t hval)
-{
-	unsigned char *s = (unsigned char *)str;	/* unsigned string */
+unsigned int fnv_32a_str(char *str, unsigned int hval) {
+	unsigned char *s = (unsigned char *)str;
 
-	/*
-	 * FNV-1a hash each octet in the buffer
-	 */
+	// FNV-1a hash each octet in the buffer
 	while (*s) {
-
-	/* xor the bottom with the current octet */
-	hval ^= (Fnv32_t)*s++;
-
-	/* multiply by the 32 bit FNV magic prime mod 2^32 */
-	hval *= FNV_32_PRIME;
-
+		// xor the bottom with the current octet
+		hval ^= (unsigned int)*s++;
+		// multiply by the 32 bit FNV magic prime mod 2^32
+		hval *= FNV_32_PRIME;
 	}
-
-	/* return our new hash value */
 	return hval;
 }

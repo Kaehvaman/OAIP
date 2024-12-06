@@ -25,11 +25,10 @@ void printBits(size_t const size, void const* const ptr) {
 int main() {
     char s1[] = "cbbc";
     char s2[] = "cddc";
-    Fnv32_t h1 = fnv_32a_str(s1, FNV1_32A_INIT);
-    Fnv32_t h2 = fnv_32a_str(s2, FNV1_32A_INIT);
-    Fnv32_t h11 = h1;
+    unsigned int h1 = fnv_32a_str(s1, FNV1_32A_INIT);
+    unsigned int h2 = fnv_32a_str(s2, FNV1_32A_INIT);
+    unsigned int h11 = h1;
    
-
     printBits(4, &h1);
     h1 = FNV_16(h1);
     h11 = TINY_FNV(15, h1);

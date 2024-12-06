@@ -10,12 +10,10 @@
  * Fnv32_t hashval argument to fnv_32a_buf() or fnv_32a_str().
 */
 
-typedef uint32_t Fnv32_t;
-
 /*
  * 32 bit magic FNV-1a prime
 */
-#define FNV_32_PRIME ((Fnv32_t)0x01000193)
+#define FNV_32_PRIME ((unsigned int)0x01000193)
 
 /*
  * 32 bit FNV-1 and FNV-1a non-zero initial basis
@@ -29,7 +27,7 @@ typedef uint32_t Fnv32_t;
  *
  * NOTE: The FNV-1a initial basis is the same value as FNV-1 by definition.
  */
-#define FNV1_32_INIT ((Fnv32_t)0x811c9dc5)
+#define FNV1_32_INIT ((unsigned int)0x811c9dc5)
 #define FNV1_32A_INIT FNV1_32_INIT
 
 /*
@@ -41,7 +39,7 @@ typedef uint32_t Fnv32_t;
 
 //For example to produce a 24 bit FNV-1 hash in C we xor-fold fold a 32 bit FNV-1 hash:
 
-#define MASK_24 (((uint32_t)1<<24)-1) /* i.e., (uint32_t)0xffffff */
+#define MASK_24 (((unsigned int)1<<24)-1) /* i.e., (uint32_t)0xffffff */
 /*
 uint32_t hash;
 void* data;
@@ -55,7 +53,7 @@ hash = (hash >> 24) ^ (hash & MASK_24);
 
 //To produce a 16 bit FNV-1 hash in C we xor-fold fold a 32 bit FNV-1 hash:
 
-#define MASK_16 (((uint32_t)1<<16)-1) /* i.e., (uint32_t)0xffff */
+#define MASK_16 (((unsigned int)1<<16)-1) /* i.e., (uint32_t)0xffff */
 /*
 uint32_t hash;
 void* data;
@@ -70,7 +68,7 @@ hash = (hash >> 16) ^ (hash & MASK_16);
 //For tiny x < 16 bit values, we recommend using a 32 bit FNV - 1 hash as follows:
 
 /* NOTE: for 0 < x < 16 ONLY!!! */
-#define TINY_MASK(x) (((uint32_t)1<<(x))-1)
+#define TINY_MASK(x) (((unsigned int)1<<(x))-1)
 /*
 uint32_t hash;
 void* data;
@@ -82,5 +80,5 @@ hash = (((hash >> x) ^ hash) & TINY_MASK(x));
 
 #define TINY_FNV(x, hash) (((hash >> x) ^ hash) & TINY_MASK(x))
 
-Fnv32_t fnv_32a_buf(void* buf, size_t len, Fnv32_t hval);
-Fnv32_t fnv_32a_str(char* str, Fnv32_t hval);
+unsigned int fnv_32a_buf(void* buf, size_t len, unsigned int hval);
+unsigned int fnv_32a_str(char* str, unsigned int hval);

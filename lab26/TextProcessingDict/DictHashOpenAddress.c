@@ -1,12 +1,14 @@
+#include "Dict.h"
+
+#ifdef DICT_HASH_OPEN_ADDRESS_C
+
 #define _CRT_SECURE_NO_WARNINGS
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "Dict.h"
+#include <stdbool.h>
 #include "fnvhash_32a.h"
 #include "jhash.h"
-
-#ifdef DICT_HASH_OPEN_ADDRESS_C
 
 #define MAX_HASH 16384
 #define TABLE_SIZE (MAX_HASH*2)
@@ -68,9 +70,7 @@ void Create() {
 Вызывается после окончания использования словаря. */
 void Destroy() {
 	for (int i = 0; i < MAX_HASH; i++) {
-		if (hashtable[i] != NULL) {
-			free(hashtable[i]);
-		}
+		free(hashtable[i]);
 		hashtable[i] = NULL;
 	}
 }

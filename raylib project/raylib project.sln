@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "raylib project", "raylib project\raylib project.vcxproj", "{25B2FDD7-DF1E-4965-B33B-A9841A50E005}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{25B2FDD7-DF1E-4965-B33B-A9841A50E005}.Debug|x64.ActiveCfg = Debug|x64
+		{25B2FDD7-DF1E-4965-B33B-A9841A50E005}.Debug|x64.Build.0 = Debug|x64
+		{25B2FDD7-DF1E-4965-B33B-A9841A50E005}.Debug|x86.ActiveCfg = Debug|Win32
+		{25B2FDD7-DF1E-4965-B33B-A9841A50E005}.Debug|x86.Build.0 = Debug|Win32
+		{25B2FDD7-DF1E-4965-B33B-A9841A50E005}.Release|x64.ActiveCfg = Release|x64
+		{25B2FDD7-DF1E-4965-B33B-A9841A50E005}.Release|x64.Build.0 = Release|x64
+		{25B2FDD7-DF1E-4965-B33B-A9841A50E005}.Release|x86.ActiveCfg = Release|Win32
+		{25B2FDD7-DF1E-4965-B33B-A9841A50E005}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

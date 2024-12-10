@@ -19,11 +19,15 @@ void wait(int seconds) {
 	printf(" wait for %d s is over, clock=%d", seconds, (int)t1);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
 
 	#ifdef WIN32
 	printf("ITS WINDOWS!\n");
 	#endif
+
+	for (int i = 0; i < argc; i++) {
+		printf("%s\n", argv[i]);
+	}
 
 	struct progressbar pb;
 	int n = 1, sl = 1;
@@ -84,6 +88,20 @@ int main() {
 		printf("\n");
 	}
 	printf("\033[0m");
+	printf("\n");
+
+	count = 0;
+	for (int i = 0; i < 16; i++) {
+		for (int j = 0; j < 16; j++) {
+			printf("\033[48;5;%dm", count);
+			printf("%02X ", count);
+			count++;
+		}
+		printf("\033[48;5;0m");
+		printf("#\n");
+	}
+	printf("\033[48;5;0m");
+	printf("\n");
 
 	return 0;
 }

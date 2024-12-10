@@ -1,14 +1,13 @@
-//
-// Реализация словаря на хэше
-// 
+#include "Dict.h"
+
+#ifdef DICT_HASH_CHAIN_C
+
 #define _CRT_SECURE_NO_WARNINGS
 #include <string.h>
 #include <stdlib.h>
-#include "Dict.h"
+#include <stdbool.h>
 #include "fnvhash_32a.h"
 #include "jhash.h"
-
-#ifdef DICT_HASH_CHAIN_C
 
 struct Node {
 	char* word;

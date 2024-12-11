@@ -86,8 +86,8 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 #define M 10
 #define N 15
-#define WIDTH 50
 #define HEIGHT 50
+#define WIDTH 50
 #define VOFFSET 50
 
 //
@@ -468,7 +468,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             drawBottomBar(hdc);
             drawPlayer(hdc);
             if (netToggle) drawNet(hdc);
-
 
 
             EndPaint(hWnd, &ps);

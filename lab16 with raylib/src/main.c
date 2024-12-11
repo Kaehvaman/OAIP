@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+п»ї#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <iso646.h>
 #include "raylib.h"
@@ -14,15 +14,16 @@
 #define HEIGHT 50
 #define WIDTH 50
 #define VOFFSET 50
+
 #define PUREBLUE (Color) { 0, 0, 255, 255 }
 #define BLACKGRAY (Color) {30, 30, 30, 255}
 #define VSGRAY (Color) {78, 201, 176, 255}
 
-// Коды ячеек:
-// 0 - свободна
+// РљРѕРґС‹ СЏС‡РµРµРє:
+// 0 - СЃРІРѕР±РѕРґРЅР°
 // 1 - 
-// 2 - препятствие
-// 3 - золото
+// 2 - РїСЂРµРїСЏС‚СЃС‚РІРёРµ
+// 3 - Р·РѕР»РѕС‚Рѕ
 int map[M][N] = {
 	{0, 0, 0, 0, 0,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0,   0, 0, 0, 0, 3,   0, 0, 0, 0, 0},
@@ -146,11 +147,11 @@ void drawNet() {
 }
 
 void drawMap() {
-	// Коды ячеек:
-	// 0 - свободна
+	// РљРѕРґС‹ СЏС‡РµРµРє:
+	// 0 - СЃРІРѕР±РѕРґРЅР°
 	// 1 - 
-	// 2 - препятствие
-	// 3 - золото
+	// 2 - РїСЂРµРїСЏС‚СЃС‚РІРёРµ
+	// 3 - Р·РѕР»РѕС‚Рѕ
 	Color colors[4] = { LIGHTGRAY, PUREBLUE, BLACK, YELLOW };
 
 	for (int i = 0; i < M; i++) {
@@ -194,10 +195,11 @@ void drawBottomBar(Font font, float fontSize) {
 void save() {
 	FILE* fout = fopen("savefile.txt", "w");
 	if (fout == NULL) {
-		GuiMessageBox((Rectangle) { N * WIDTH / 2 - 50 , M*HEIGHT - 50, N * WIDTH / 2 + 50 , M*HEIGHT + 50,},
-			"Ошибка сохранения",
-			"Невозможно создать файл",
-			"Ок;Выйти");
+		/*GuiMessageBox((Rectangle) { N * WIDTH / 2 - 50 , M*HEIGHT - 50, N * WIDTH / 2 + 50 , M*HEIGHT + 50,},
+			"РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ",
+			"РќРµРІРѕР·РјРѕР¶РЅРѕ СЃРѕР·РґР°С‚СЊ С„Р°Р№Р»",
+			"РћРє;Р’С‹Р№С‚Рё");*/
+		printf("save error");
 		return;
 	}
 
@@ -222,21 +224,21 @@ void save() {
 void load() {
 	FILE* fin = fopen("savefile.txt", "r");
 	if (fin == NULL) {
-		printf("error");
-		GuiMessageBox((Rectangle) { N* WIDTH / 2 - 50, M* HEIGHT - 50, N* WIDTH / 2 + 50, M* HEIGHT + 50, },
-			"Ошибка загрузки",
-			"Файл не найден\nПопробуйте сначала сохранить игру",
-			"Ок;Выйти");
+		printf("1) load error\n");
+		/*GuiMessageBox((Rectangle) { N* WIDTH / 2 - 50, M* HEIGHT - 50, N* WIDTH / 2 + 50, M* HEIGHT + 50, },
+			"РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё",
+			"Р¤Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ\nРџРѕРїСЂРѕР±СѓР№С‚Рµ СЃРЅР°С‡Р°Р»Р° СЃРѕС…СЂР°РЅРёС‚СЊ РёРіСЂСѓ",
+			"РћРє;Р’С‹Р№С‚Рё");*/
 		return;
 	}
 	int m, n;
 	fscanf_s(fin, "%d%d", &m, &n);
 	if (m != M || n != N) {
-		printf("error");
-		GuiMessageBox((Rectangle) { N* WIDTH / 2 - 50, M* HEIGHT - 50, N* WIDTH / 2 + 50, M* HEIGHT + 50, },
-			"Ошибка загрузки",
-			"Неправильный размер карты!\nПроверьте целостность сохранения",
-			"Ок;Выйти");
+		printf("2) load error\n");
+		/*GuiMessageBox((Rectangle) { N* WIDTH / 2 - 50, M* HEIGHT - 50, N* WIDTH / 2 + 50, M* HEIGHT + 50, },
+			"РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё",
+			"РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ РєР°СЂС‚С‹!\nРџСЂРѕРІРµСЂСЊС‚Рµ С†РµР»РѕСЃС‚РЅРѕСЃС‚СЊ СЃРѕС…СЂР°РЅРµРЅРёСЏ",
+			"РћРє;Р’С‹Р№С‚Рё");*/
 		return;
 	}
 	for (int i = 0; i < m; i++) {
@@ -255,60 +257,65 @@ void load() {
 }
 
 void handleKeys() {
-	switch (GetKeyPressed())
-	{
-	case KEY_F5:
-		save();
-		break;
-	case KEY_F9:
-		load();
-		break;
-	case KEY_SPACE:
-		netToggle = !netToggle;
-		break;
-	case KEY_W:
-		movePlayer(up);
-		break;
-	case KEY_S:
-		movePlayer(down);
-		break;
-	case KEY_D:
-		movePlayer(right);
-		break;
-	case KEY_A:
-		movePlayer(left);
-		break;
-	case KEY_ONE:
-		stomp(1);
-		break;
-	case KEY_TWO:
-		stomp(2);
-		break;
-	case KEY_Z:
-		deathbeam(right);
-		break;
-	case KEY_M:
-		doMidashand();
-		break;
-	case KEY_G:
-		if (selected_element == gold) selected_element = wall;
-		else selected_element = gold;
-		break;
-	case KEY_LEFT:
-		putElement(left, selected_element);
-		break;
-	case KEY_RIGHT:
-		putElement(right, selected_element);
-		break;
-	case KEY_UP:
-		putElement(up, selected_element);
-		break;
-	case KEY_DOWN:
-		putElement(down, selected_element);
-		break;
+	int key;
+	while (key = GetKeyPressed()) {
+		switch (key)
+		{
+		case KEY_F5:
+			save();
+			break;
+		case KEY_F9:
+			load();
+			break;
+		case KEY_SPACE:
+			netToggle = !netToggle;
+			break;
+		case KEY_W:
+			movePlayer(up);
+			break;
+		case KEY_S:
+			movePlayer(down);
+			break;
+		case KEY_D:
+			movePlayer(right);
+			break;
+		case KEY_A:
+			movePlayer(left);
+			break;
+		case KEY_ONE:
+			stomp(1);
+			break;
+		case KEY_TWO:
+			stomp(2);
+			break;
+		case KEY_Z:
+			deathbeam(right);
+			break;
+		case KEY_M:
+			doMidashand();
+			break;
+		case KEY_G:
+			if (selected_element == gold) selected_element = wall;
+			else selected_element = gold;
+			break;
+		case KEY_LEFT:
+			putElement(left, selected_element);
+			break;
+		case KEY_RIGHT:
+			putElement(right, selected_element);
+			break;
+		case KEY_UP:
+			putElement(up, selected_element);
+			break;
+		case KEY_DOWN:
+			putElement(down, selected_element);
+			break;
+		}
 	}
 }
 
+
+#define CDPSIZE 213
 int main() {
 	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 
@@ -318,10 +325,16 @@ int main() {
 
 	SearchAndSetResourceDir("resources");
 
+	int codepoints[CDPSIZE] = { 0 };
+	for (int i = 0; i < 127 - 32; i++) codepoints[i] = 32 + i;   // Basic ASCII characters
+	for (int i = 0; i < 118; i++) codepoints[95 + i] = 1024 + i;   // Cyrillic characters
+
 	//Font InconsolataRegular = LoadFontEx("Inconsolata-Regular.ttf", 24, NULL, 0);
-	Font InconsolataSemiBold = LoadFontEx("Inconsolata-SemiBold.ttf", 48, NULL, 0);
-	SetTextureFilter(InconsolataSemiBold.texture, TEXTURE_FILTER_BILINEAR);
-	//Font InconsolataBold = LoadFontEx("Inconsolata-Bold.ttf", 24, NULL, 0);
+	//Font InconsolataSemiBold = LoadFontEx("Inconsolata-SemiBold.ttf", 48, codepoints, 512);
+	Font InconsolataBold = LoadFontEx("Inconsolata-LGC-Bold.ttf", 48, codepoints, CDPSIZE);
+	SetTextureFilter(InconsolataBold.texture, TEXTURE_FILTER_BILINEAR);
+
+	//GuiSetFont(InconsolataBold);
 	
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
@@ -336,18 +349,22 @@ int main() {
 
 		drawMap();
 		drawPlayer();
-		drawBottomBar(InconsolataSemiBold, 24);
+		drawBottomBar(InconsolataBold, 24);
 
 		if (netToggle) {
 			drawNet();
 		}
+
+		// show FPS and frametime
+		//DrawText(TextFormat("%2d FPS", GetFPS()), 0, 0, 34, ORANGE);
+		//DrawText(TextFormat("%4f ms", GetFrameTime()), 0, 34, 34, BEIGE);
 		
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();
 	}
 
 	//UnloadFont(InconsolataRegular);
-	UnloadFont(InconsolataSemiBold);
+	UnloadFont(InconsolataBold);
 	//UnloadFont(InconsolataBold);
 
 	// destroy the window and cleanup the OpenGL context

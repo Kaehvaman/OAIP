@@ -139,7 +139,6 @@
     <ClInclude Include="..\include\raymath.h" />
     <ClInclude Include="..\include\resource_dir.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="resource1.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.c" />

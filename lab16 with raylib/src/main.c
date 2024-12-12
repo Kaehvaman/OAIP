@@ -8,6 +8,8 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
+#include "windows_functions.h"
+
 #define M 10
 #define N 15
 #define HEIGHT 50
@@ -197,10 +199,6 @@ void drawBottomBar(Font font, float fontSize) {
 void save() {
 	FILE* fout = fopen("savefile.txt", "w");
 	if (fout == NULL) {
-		/*GuiMessageBox((Rectangle) { N * WIDTH / 2 - 50 , M*HEIGHT - 50, N * WIDTH / 2 + 50 , M*HEIGHT + 50,},
-			"Ошибка сохранения",
-			"Невозможно создать файл",
-			"Ок;Выйти");*/
 		printf("save error");
 		return;
 	}
@@ -223,24 +221,32 @@ void save() {
 	fclose(fout);
 }
 
+typedef enum ErrorCodes { OK = 0, saveError, loadError1, loadError2 } ErrorCodes;
+ErrorCodes errorCode = OK;
 void load() {
 	FILE* fin = fopen("savefile.txt", "r");
 	if (fin == NULL) {
 		printf("1) load error\n");
-		/*GuiMessageBox((Rectangle) { N* WIDTH / 2 - 50, M* HEIGHT - 50, N* WIDTH / 2 + 50, M* HEIGHT + 50, },
-			"Ошибка загрузки",
+		/*MessageBoxA(
+			NULL,
 			"Файл не найден\nПопробуйте сначала сохранить игру",
-			"Ок;Выйти");*/
+			"Ошибка загрузки",
+			MB_ICONERROR
+		);*/
+		errorCode = loadError1;
 		return;
 	}
 	int m, n;
 	fscanf_s(fin, "%d%d", &m, &n);
 	if (m != M || n != N) {
 		printf("2) load error\n");
-		/*GuiMessageBox((Rectangle) { N* WIDTH / 2 - 50, M* HEIGHT - 50, N* WIDTH / 2 + 50, M* HEIGHT + 50, },
-			"Ошибка загрузки",
-			"Неправильный размер карты!\nПроверьте целостность сохранения",
-			"Ок;Выйти");*/
+		/*MessageBoxW(
+			NULL,
+			L"Неправильный размер карты!\nПроверьте целостность сохранения",
+			L"Ошибка загрузки",
+			MB_ICONERROR
+		);*/
+		errorCode = loadError2;
 		return;
 	}
 	for (int i = 0; i < m; i++) {
@@ -332,8 +338,51 @@ void handleKeys() {
 	}
 }
 
+Rectangle errorBoxRect = { N * WIDTH / 2 - 200, M * HEIGHT / 2 - 100, 400, 200 };
+void drawErrorBoxes() {
+	int btn = -1;
+
+	switch (errorCode)
+	{
+	case OK:
+		break;
+	case saveError:
+		btn = GuiMessageBox(errorBoxRect,
+			u8"Ошибка сохранения",
+			u8"Невозможно создать файл",
+			u8"Ок;Выйти");
+		break;
+	case loadError1:
+		btn = GuiMessageBox(errorBoxRect,
+			u8"Ошибка загрузки",
+			u8"Файл не найден\nПопробуйте сначала сохранить игру",
+			u8"Ок;Выйти");
+		break;
+	case loadError2:
+		btn = GuiMessageBox(errorBoxRect,
+			u8"Ошибка загрузки",
+			u8"Неправильный размер карты!\nПроверьте целостность сохранения",
+			u8"Ок;Выйти");
+		break;
+	}
+
+	switch (btn)
+	{
+	case 0:
+		errorCode = OK;
+		break;
+	case 1:
+		errorCode = OK;
+		break;
+	case 2:
+		exit(0);
+		break;
+	}
+}
+
 #define CPSIZE 213
-int main() {
+int main()
+{
 	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 
 	InitWindow(N * WIDTH, M * HEIGHT + VOFFSET, "lab16 with raylib");
@@ -348,10 +397,11 @@ int main() {
 
 	//Font InconsolataRegular = LoadFontEx("Inconsolata-Regular.ttf", 24, NULL, 0);
 	//Font InconsolataSemiBold = LoadFontEx("Inconsolata-SemiBold.ttf", 48, codepoints, 512);
-	Font InconsolataBold = LoadFontEx("Inconsolata-LGC-Bold.ttf", 48, codepoints, CPSIZE);
+	Font InconsolataBold = LoadFontEx("Inconsolata-LGC-Bold.ttf", 36, codepoints, CPSIZE);
 	SetTextureFilter(InconsolataBold.texture, TEXTURE_FILTER_BILINEAR);
 
-	//GuiSetFont(InconsolataBold);
+	GuiSetFont(InconsolataBold);
+	GuiSetStyle(DEFAULT, TEXT_SIZE, 22);
 	
 	Vector2 mousePos = { 0 };
 	int mouseCellX = 0;
@@ -363,22 +413,25 @@ int main() {
 		//------------------------------------------------------------------
 		// Update
 		//------------------------------------------------------------------
-		handleKeys();
-		mousePos = GetMousePosition();
+		if (errorCode == OK)
+		{
+			handleKeys();
+			mousePos = GetMousePosition();
 
-		if (editMap) {
-			mouseCellX = (int)(Clamp(mousePos.x, 0, FWIDTH * N - 1) / WIDTH);
-			mouseCellY = (int)(Clamp(mousePos.y, 0, FHEIGHT * M - 1) / HEIGHT);
+			if (editMap) {
+				mouseCellX = (int)(Clamp(mousePos.x, 0, FWIDTH * N - 1) / WIDTH);
+				mouseCellY = (int)(Clamp(mousePos.y, 0, FHEIGHT * M - 1) / HEIGHT);
 
-			if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) and not(mouseCellX == player_x and mouseCellY == player_y)) {
-				map[mouseCellY][mouseCellX] = selected_element;
+				if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) and not(mouseCellX == player_x and mouseCellY == player_y)) {
+					map[mouseCellY][mouseCellX] = selected_element;
+				}
+				else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+					map[mouseCellY][mouseCellX] = empty;
+				}
+
 			}
-			else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-				map[mouseCellY][mouseCellX] = empty;
-			}
-
 		}
-
+		
 		//------------------------------------------------------------------
 		// Draw
 		//------------------------------------------------------------------
@@ -411,6 +464,8 @@ int main() {
 		if (netToggle) {
 			drawNet();
 		}
+
+		drawErrorBoxes();
 
 		// show mouse position
 		//DrawText(TextFormat("%.1f %.1f", mousePos.x, mousePos.y), 5, M * HEIGHT - 30, 30, ORANGE);

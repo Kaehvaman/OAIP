@@ -3,17 +3,19 @@
 #include <iso646.h>
 #include "raylib.h"
 #include "raymath.h"
+#include "resource_dir.h"
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
-
-#include "resource_dir.h"
 
 #define M 10
 #define N 15
 #define HEIGHT 50
 #define WIDTH 50
 #define VOFFSET 50
+
+#define FWIDTH (float)WIDTH
+#define FHEIGHT (float)HEIGHT
 
 #define PUREBLUE (Color) { 0, 0, 255, 255 }
 #define BLACKGRAY (Color) {30, 30, 30, 255}
@@ -137,11 +139,11 @@ void doMidashand() {
 
 bool netToggle = false;
 void drawNet() {
-	for (int i = 0; i <= N * WIDTH; i = i + WIDTH) {
+	for (int i = 0; i <= N * WIDTH; i += WIDTH) {
 		DrawLine(i, 0, i, M * HEIGHT, BLACK);
 	}
 
-	for (int i = 0; i <= M * HEIGHT; i = i + HEIGHT) {
+	for (int i = 0; i <= M * HEIGHT; i += HEIGHT) {
 		DrawLine(0, i, N * WIDTH, i, BLACK);
 	}
 }
@@ -256,9 +258,58 @@ void load() {
 	fclose(fin);
 }
 
+bool editMap = 0;
 void handleKeys() {
+
+	/*if (IsKeyPressedRepeat(KEY_W)) movePlayer(up);
+	if (IsKeyPressedRepeat(KEY_S)) movePlayer(down);
+	if (IsKeyPressedRepeat(KEY_D)) movePlayer(right);
+	if (IsKeyPressedRepeat(KEY_A)) movePlayer(left);*/
+
 	int key;
 	while (key = GetKeyPressed()) {
+		if (not editMap) {
+			switch (key)
+			{
+			case KEY_W:
+				movePlayer(up);
+				break;
+			case KEY_S:
+				movePlayer(down);
+				break;
+			case KEY_D:
+				movePlayer(right);
+				break;
+			case KEY_A:
+				movePlayer(left);
+				break;
+			case KEY_ONE:
+				stomp(1);
+				break;
+			case KEY_TWO:
+				stomp(2);
+				break;
+			case KEY_Z:
+				deathbeam(right);
+				break;
+			case KEY_M:
+				doMidashand();
+				break;
+			case KEY_LEFT:
+				putElement(left, selected_element);
+				break;
+			case KEY_RIGHT:
+				putElement(right, selected_element);
+				break;
+			case KEY_UP:
+				putElement(up, selected_element);
+				break;
+			case KEY_DOWN:
+				putElement(down, selected_element);
+				break;
+			}
+		}
+		
 		switch (key)
 		{
 		case KEY_F5:
@@ -270,52 +321,18 @@ void handleKeys() {
 		case KEY_SPACE:
 			netToggle = !netToggle;
 			break;
-		case KEY_W:
-			movePlayer(up);
-			break;
-		case KEY_S:
-			movePlayer(down);
-			break;
-		case KEY_D:
-			movePlayer(right);
-			break;
-		case KEY_A:
-			movePlayer(left);
-			break;
-		case KEY_ONE:
-			stomp(1);
-			break;
-		case KEY_TWO:
-			stomp(2);
-			break;
-		case KEY_Z:
-			deathbeam(right);
-			break;
-		case KEY_M:
-			doMidashand();
+		case KEY_ENTER:
+			editMap = !editMap;
 			break;
 		case KEY_G:
 			if (selected_element == gold) selected_element = wall;
 			else selected_element = gold;
 			break;
-		case KEY_LEFT:
-			putElement(left, selected_element);
-			break;
-		case KEY_RIGHT:
-			putElement(right, selected_element);
-			break;
-		case KEY_UP:
-			putElement(up, selected_element);
-			break;
-		case KEY_DOWN:
-			putElement(down, selected_element);
-			break;
 		}
 	}
 }
 
-
-#define CDPSIZE 213
+#define CPSIZE 213
 int main() {
 	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 
@@ -325,25 +342,47 @@ int main() {
 
 	SearchAndSetResourceDir("resources");
 
-	int codepoints[CDPSIZE] = { 0 };
+	int codepoints[CPSIZE] = { 0 };
 	for (int i = 0; i < 127 - 32; i++) codepoints[i] = 32 + i;   // Basic ASCII characters
 	for (int i = 0; i < 118; i++) codepoints[95 + i] = 1024 + i;   // Cyrillic characters
 
 	//Font InconsolataRegular = LoadFontEx("Inconsolata-Regular.ttf", 24, NULL, 0);
 	//Font InconsolataSemiBold = LoadFontEx("Inconsolata-SemiBold.ttf", 48, codepoints, 512);
-	Font InconsolataBold = LoadFontEx("Inconsolata-LGC-Bold.ttf", 48, codepoints, CDPSIZE);
+	Font InconsolataBold = LoadFontEx("Inconsolata-LGC-Bold.ttf", 48, codepoints, CPSIZE);
 	SetTextureFilter(InconsolataBold.texture, TEXTURE_FILTER_BILINEAR);
 
 	//GuiSetFont(InconsolataBold);
 	
+	Vector2 mousePos = { 0 };
+	int mouseCellX = 0;
+	int mouseCellY = 0;
+
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
+		//------------------------------------------------------------------
+		// Update
+		//------------------------------------------------------------------
 		handleKeys();
+		mousePos = GetMousePosition();
 
-		// drawing
+		if (editMap) {
+			mouseCellX = (int)(Clamp(mousePos.x, 0, FWIDTH * N - 1) / WIDTH);
+			mouseCellY = (int)(Clamp(mousePos.y, 0, FHEIGHT * M - 1) / HEIGHT);
+
+			if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) and not(mouseCellX == player_x and mouseCellY == player_y)) {
+				map[mouseCellY][mouseCellX] = selected_element;
+			}
+			else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+				map[mouseCellY][mouseCellX] = empty;
+			}
+
+		}
+
+		//------------------------------------------------------------------
+		// Draw
+		//------------------------------------------------------------------
 		BeginDrawing();
-
 		// Setup the back buffer for drawing (clear color and depth buffers)
 		ClearBackground(WHITE);
 
@@ -351,9 +390,30 @@ int main() {
 		drawPlayer();
 		drawBottomBar(InconsolataBold, 24);
 
+		if (editMap) {
+			Rectangle rec = {
+			mouseCellX * FWIDTH,
+			mouseCellY * FHEIGHT,
+			FWIDTH, FHEIGHT
+			};
+			
+			Color color = { 0, 0, 0, 255 };
+			if (mouseCellX == player_x and mouseCellY == player_y) {
+				color.r = 255;
+			}
+			else {
+				color.g = 255;
+			}
+
+			DrawRectangleLinesEx(rec, 2, color);
+		}
+
 		if (netToggle) {
 			drawNet();
 		}
+
+		// show mouse position
+		//DrawText(TextFormat("%.1f %.1f", mousePos.x, mousePos.y), 5, M * HEIGHT - 30, 30, ORANGE);
 
 		// show FPS and frametime
 		//DrawText(TextFormat("%2d FPS", GetFPS()), 0, 0, 34, ORANGE);

@@ -4,11 +4,14 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "resource_dir.h"
+#include "windows_functions.h"
 
 #define RAYGUI_IMPLEMENTATION
+//#define RAYGUI_PANEL_BORDER_WIDTH 2
+#define RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT 32
+#define RAYGUI_MESSAGEBOX_BUTTON_HEIGHT 36
 #include "raygui.h"
 
-#include "windows_functions.h"
 
 #define M 10
 #define N 15
@@ -45,13 +48,13 @@ int map[M][N] = {
 int player_x = 1;
 int player_y = 1;
 
-typedef enum obj_enum { empty = 0, wall = 2, gold = 3 } obj_enum;
+typedef enum { empty = 0, wall = 2, gold = 3 } obj_enum;
 // TODO: do something with "empty" object
 #define INVENTORY_SIZE 4
 int inventory[INVENTORY_SIZE] = { 0, 0, 15, 0 };
 obj_enum selected_element = gold;
 
-typedef enum enum_ways { left, right, up, down } enum_ways;
+typedef enum { left, right, up, down } enum_ways;
 void movePlayer(enum_ways move) {
 	switch (move) {
 	case left:
@@ -221,7 +224,7 @@ void save() {
 	fclose(fout);
 }
 
-typedef enum ErrorCodes { OK = 0, saveError, loadError1, loadError2 } ErrorCodes;
+typedef enum { OK = 0, saveError, loadError1, loadError2 } ErrorCodes;
 ErrorCodes errorCode = OK;
 void load() {
 	FILE* fin = fopen("savefile.txt", "r");
@@ -338,7 +341,7 @@ void handleKeys() {
 	}
 }
 
-Rectangle errorBoxRect = { N * WIDTH / 2 - 200, M * HEIGHT / 2 - 100, 400, 200 };
+Rectangle errorBoxRect = { N * WIDTH / 2 - 200, M * HEIGHT / 2 - 75, 400, 150 };
 void drawErrorBoxes() {
 	int btn = -1;
 
@@ -356,13 +359,13 @@ void drawErrorBoxes() {
 		btn = GuiMessageBox(errorBoxRect,
 			u8"Ошибка загрузки",
 			u8"Файл не найден\nПопробуйте сначала сохранить игру",
-			u8"Ок;Выйти");
+			u8"Игнорировать;Выйти из игры");
 		break;
 	case loadError2:
 		btn = GuiMessageBox(errorBoxRect,
 			u8"Ошибка загрузки",
 			u8"Неправильный размер карты!\nПроверьте целостность сохранения",
-			u8"Ок;Выйти");
+			u8"Игнорировать;Выйти из игры");
 		break;
 	}
 
@@ -401,7 +404,10 @@ int main()
 	SetTextureFilter(InconsolataBold.texture, TEXTURE_FILTER_BILINEAR);
 
 	GuiSetFont(InconsolataBold);
-	GuiSetStyle(DEFAULT, TEXT_SIZE, 22);
+	GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
+	GuiSetStyle(DEFAULT, TEXT_SPACING, 0);
+	GuiSetStyle(DEFAULT, TEXT_LINE_SPACING, 24);
+	//GuiSetStyle(STATUSBAR, BORDER_WIDTH, 2);
 	
 	Vector2 mousePos = { 0 };
 	int mouseCellX = 0;
@@ -416,9 +422,9 @@ int main()
 		if (errorCode == OK)
 		{
 			handleKeys();
-			mousePos = GetMousePosition();
 
 			if (editMap) {
+				mousePos = GetMousePosition();
 				mouseCellX = (int)(Clamp(mousePos.x, 0, FWIDTH * N - 1) / WIDTH);
 				mouseCellY = (int)(Clamp(mousePos.y, 0, FHEIGHT * M - 1) / HEIGHT);
 

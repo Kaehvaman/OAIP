@@ -1,5 +1,6 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
+#include <stdlib.h>
 #include <iso646.h>
 #include "raylib.h"
 #include "raymath.h"
@@ -12,6 +13,10 @@
 #define RAYGUI_MESSAGEBOX_BUTTON_HEIGHT 36
 #include "raygui.h"
 
+#define RAYLIB_NUKLEAR_IMPLEMENTATION
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#pragma warning(disable: 4116)
+#include "raylib-nuklear.h"
 
 #define M 10
 #define N 15
@@ -231,7 +236,7 @@ void load() {
 	if (fin == NULL) {
 		printf("1) load error\n");
 		/*MessageBoxA(
-			NULL,
+			GetActiveWindow(),
 			"Файл не найден\nПопробуйте сначала сохранить игру",
 			"Ошибка загрузки",
 			MB_ICONERROR
@@ -341,8 +346,8 @@ void handleKeys() {
 	}
 }
 
-Rectangle errorBoxRect = { N * WIDTH / 2 - 200, M * HEIGHT / 2 - 75, 400, 150 };
-void drawErrorBoxes() {
+void drawRayguiErrorBoxes() {
+	const Rectangle errorBoxRect = { N * WIDTH / 2 - 200, M * HEIGHT / 2 - 75, 400, 150 };
 	int btn = -1;
 
 	switch (errorCode)
@@ -383,14 +388,81 @@ void drawErrorBoxes() {
 	}
 }
 
+int nk_error_box(struct nk_context* ctx, const char* title, const char* error, const char* description)
+{
+	int result = -1;
+	if (nk_begin(ctx, title,
+		nk_rect(N * WIDTH / 2 - 200, M * HEIGHT / 2 - 72, 400, 144),
+		NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR))
+	{
+		nk_layout_row_dynamic(ctx, 24, 1);
+		nk_label(ctx, error, NK_TEXT_CENTERED);
+		nk_layout_row_dynamic(ctx, 24, 1);
+		nk_label(ctx, description, NK_TEXT_CENTERED);
+		nk_layout_row_dynamic(ctx, 36, 2);
+		if (nk_button_label(ctx, u8"Игнорировать")) {
+			result = 1;
+		}
+		if (nk_button_label(ctx, u8"Выйти из игры")) {
+			result = 2;
+		}
+	}
+	else {
+		result = 0;
+	}
+	return result;
+}
+
+void callNKErrorBoxes(struct nk_context* ctx) {
+	int btn = -1;
+
+	switch (errorCode)
+	{
+	case OK:
+		break;
+	case saveError:
+		btn = nk_error_box(ctx,
+			u8"Ошибка сохранения",
+			u8"Невозможно создать файл",
+			u8"Проверьте целостность сохранения");
+		break;
+	case loadError1:
+		btn = nk_error_box(ctx,
+			u8"Ошибка загрузки",
+			u8"Файл не найден",
+			u8"Проверьте целостность сохранения");
+		break;
+	case loadError2:
+		btn = nk_error_box(ctx,
+			u8"Ошибка загрузки",
+			u8"Неправильный размер карты!",
+			u8"Проверьте целостность сохранения");
+		break;
+	}
+
+	switch (btn)
+	{
+	case 0:
+		errorCode = OK;
+		break;
+	case 1:
+		errorCode = OK;
+		break;
+	case 2:
+		exit(0);
+		break;
+	}
+}
+
 #define CPSIZE 213
 int main()
 {
-	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+	SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+	//SetConfigFlags(FLAG_MSAA_4X_HINT);
 
 	InitWindow(N * WIDTH, M * HEIGHT + VOFFSET, "lab16 with raylib");
 
-	SetTargetFPS(60);
+	SetTargetFPS(20);
 
 	SearchAndSetResourceDir("resources");
 
@@ -402,12 +474,17 @@ int main()
 	//Font InconsolataSemiBold = LoadFontEx("Inconsolata-SemiBold.ttf", 48, codepoints, 512);
 	Font InconsolataBold = LoadFontEx("Inconsolata-LGC-Bold.ttf", 36, codepoints, CPSIZE);
 	SetTextureFilter(InconsolataBold.texture, TEXTURE_FILTER_BILINEAR);
+	//Font Arial = LoadFontEx("arial.ttf", 36, codepoints, CPSIZE);
+	//SetTextureFilter(Arial.texture, TEXTURE_FILTER_BILINEAR);
 
 	GuiSetFont(InconsolataBold);
 	GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
 	GuiSetStyle(DEFAULT, TEXT_SPACING, 0);
 	GuiSetStyle(DEFAULT, TEXT_LINE_SPACING, 24);
-	//GuiSetStyle(STATUSBAR, BORDER_WIDTH, 2);
+	GuiSetStyle(STATUSBAR, BORDER_WIDTH, 2);
+
+	// Create the Nuklear Context
+	struct nk_context* ctx = InitNuklearEx(InconsolataBold, 24);
 	
 	Vector2 mousePos = { 0 };
 	int mouseCellX = 0;
@@ -417,7 +494,7 @@ int main()
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
 		//------------------------------------------------------------------
-		// Update
+		// Update game logic
 		//------------------------------------------------------------------
 		if (errorCode == OK)
 		{
@@ -437,6 +514,16 @@ int main()
 
 			}
 		}
+		else {
+			//------------------------------------------------------------------
+			// Update Nuklear context
+			//------------------------------------------------------------------
+			UpdateNuklear(ctx);
+
+			callNKErrorBoxes(ctx);
+
+			nk_end(ctx);
+		}
 		
 		//------------------------------------------------------------------
 		// Draw
@@ -448,6 +535,9 @@ int main()
 		drawMap();
 		drawPlayer();
 		drawBottomBar(InconsolataBold, 24);
+
+		const Rectangle RoundRect = { 100, 250, 185, 36 };
+		DrawRectangleRoundedLinesEx(RoundRect, 0.3f, 20, 1, BLACK);
 
 		if (editMap) {
 			Rectangle rec = {
@@ -471,7 +561,14 @@ int main()
 			drawNet();
 		}
 
-		drawErrorBoxes();
+		if (errorCode > OK) {
+			// Render the Nuklear GUI
+			DrawNuklear(ctx);
+
+			//drawRayguiErrorBoxes();
+		}
+
+		//DrawTextEx(InconsolataBold, u8"Файл не найден\nПопробуйте сначала сохранить игру", (Vector2) { 100, 100 }, 24, 0, BLACK);
 
 		// show mouse position
 		//DrawText(TextFormat("%.1f %.1f", mousePos.x, mousePos.y), 5, M * HEIGHT - 30, 30, ORANGE);
@@ -486,7 +583,11 @@ int main()
 
 	//UnloadFont(InconsolataRegular);
 	UnloadFont(InconsolataBold);
+	//UnloadFont(Arial);
 	//UnloadFont(InconsolataBold);
+
+	// De-initialize the Nuklear GUI
+	UnloadNuklear(ctx);
 
 	// destroy the window and cleanup the OpenGL context
 	CloseWindow();

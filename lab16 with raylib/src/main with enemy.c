@@ -6,7 +6,6 @@
 #include "raymath.h"
 #include "resource_dir.h"
 #include "windows_functions.h"
-#include "tinyfiledialogs.h"
 
 #define RAYGUI_IMPLEMENTATION
 //#define RAYGUI_PANEL_BORDER_WIDTH 2
@@ -16,7 +15,6 @@
 
 #define RAYLIB_NUKLEAR_IMPLEMENTATION
 #define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-//#define RAYLIB_NUKLEAR_DEFAULT_ARC_SEGMENTS 1
 #pragma warning(disable: 4116)
 #include "raylib-nuklear.h"
 
@@ -31,7 +29,7 @@
 
 #define PUREBLUE (Color) { 0, 0, 255, 255 }
 #define BLACKGRAY (Color) {30, 30, 30, 255}
-#define VSGREEN (Color) {78, 201, 176, 255}
+#define VSGRAY (Color) {78, 201, 176, 255}
 
 // Коды ячеек:
 // 0 - свободна
@@ -54,6 +52,14 @@ int map[M][N] = {
 
 int player_x = 1;
 int player_y = 1;
+bool player_turn = true;
+
+int enemy_x = 14;
+int enemy_y = 1;
+int target_gold_x = 0;
+int target_gold_y = 0;
+int min_dist_to_gold = INT_MAX;
+int enemy_gold = 0;
 
 typedef enum { empty = 0, wall = 2, gold = 3 } obj_enum;
 // TODO: do something with "empty" object
@@ -82,6 +88,49 @@ void movePlayer(enum_ways move) {
 		inventory[gold]++;
 	}
 }
+
+void moveEnemy() {
+	int dx = target_gold_x - enemy_x;
+	int dy = target_gold_y - enemy_y;
+	enum_ways move = -1;
+	if (dx) {
+		if (dx > 0) {
+			move = right;
+		}
+		else if (dx < 0) {
+			move = left;
+		}
+	}
+	else {
+		if (dy > 0) {
+			move = down;
+		}
+		else if (dy < 0) {
+			move = up;
+		}
+	}
+
+	switch (move) {
+	case left:
+		if ((enemy_x > 0) and map[enemy_y][enemy_x - 1] != wall) enemy_x -= 1;
+		break;
+	case right:
+		if ((enemy_x < N - 1) and map[enemy_y][enemy_x + 1] != wall) enemy_x += 1;
+		break;
+	case up:
+		if ((enemy_y > 0) and map[enemy_y - 1][enemy_x] != wall) enemy_y -= 1;
+		break;
+	case down:
+		if ((enemy_y < M - 1) and map[enemy_y + 1][enemy_x] != wall) enemy_y += 1;
+		break;
+	}
+	if (map[enemy_y][enemy_x] == gold) {
+		map[enemy_y][enemy_x] = empty;
+		enemy_gold++;
+		min_dist_to_gold = INT_MAX;
+	}
+}
+
 
 void putElement(enum_ways way, obj_enum element) {
 	if (element != empty && inventory[element] == 0) return;
@@ -172,15 +221,32 @@ void drawMap() {
 		for (int j = 0; j < N; j++) {
 			int x1 = j * WIDTH;
 			int y1 = i * HEIGHT;
+			int dist = abs(j - enemy_x) + abs(i - enemy_y);
+			if (map[i][j] == gold and dist < min_dist_to_gold) {
+				min_dist_to_gold = dist;
+				target_gold_x = j;
+				target_gold_y = i;
+			}
 			DrawRectangle(x1, y1, WIDTH, HEIGHT, colors[map[i][j]]);
 		}
 	}
+	if (map[target_gold_y][target_gold_x] != gold) {
+		min_dist_to_gold = INT_MAX;
+	}
+	DrawRectangle(target_gold_x * WIDTH, target_gold_y * HEIGHT, WIDTH, HEIGHT, ORANGE);
 }
 
 void drawPlayer() {
 	int x1 = player_x * WIDTH;
 	int y1 = player_y * HEIGHT;;
 	DrawRectangle(x1, y1, WIDTH, HEIGHT, PUREBLUE);
+}
+
+void drawEnemy(Font font) {
+	int x1 = enemy_x * WIDTH;
+	int y1 = enemy_y * HEIGHT;;
+	DrawRectangle(x1, y1, WIDTH, HEIGHT, RED);
+	DrawTextEx(font, TextFormat("%d", enemy_gold), (Vector2) { (float)x1, (float)y1 }, 24, 0, BLACK);
 }
 
 void drawBottomBar(Font font, float fontSize) {
@@ -201,9 +267,9 @@ void drawBottomBar(Font font, float fontSize) {
 	Vector2 wallpos = { WIDTH / 4, HEIGHT * M + fontSize };
 	Vector2 helppos = { WIDTH * N - 550 , HEIGHT * M };
 
-	DrawTextEx(font, gold_string, goldpos, fontSize, 0, VSGREEN);
-	DrawTextEx(font, wall_string, wallpos, fontSize, 0, VSGREEN);
-	DrawTextEx(font, help_string, helppos, fontSize, 0, VSGREEN);
+	DrawTextEx(font, gold_string, goldpos, fontSize, 0, VSGRAY);
+	DrawTextEx(font, wall_string, wallpos, fontSize, 0, VSGRAY);
+	DrawTextEx(font, help_string, helppos, fontSize, 0, VSGRAY);
 }
 
 void save() {
@@ -243,11 +309,6 @@ void load() {
 			"Ошибка загрузки",
 			MB_ICONERROR
 		);*/
-		tinyfd_messageBox(
-			u8"Ошибка сохранения",
-			u8"Невозможно создать файл\nПроверьте целостность сохранения",
-			u8"ok",
-			"error", 1);
 		errorCode = loadError1;
 		return;
 	}
@@ -349,6 +410,8 @@ void handleKeys() {
 			if (selected_element == gold) selected_element = wall;
 			else selected_element = gold;
 			break;
+		default:
+			player_turn = false;
 		}
 	}
 }
@@ -437,12 +500,12 @@ void callNKErrorBoxes(struct nk_context* ctx) {
 		btn = nk_error_box(ctx,
 			u8"Ошибка загрузки",
 			u8"Файл не найден",
-			u8"Попробуйте сначала сохранить игру");
+			u8"Проверьте целостность сохранения");
 		break;
 	case loadError2:
 		btn = nk_error_box(ctx,
 			u8"Ошибка загрузки",
-			u8"Неправильный размер карты",
+			u8"Неправильный размер карты!",
 			u8"Проверьте целостность сохранения");
 		break;
 	}
@@ -464,7 +527,7 @@ void callNKErrorBoxes(struct nk_context* ctx) {
 #define CPSIZE 213
 int main()
 {
-	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+	SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 	//SetConfigFlags(FLAG_MSAA_4X_HINT);
 
 	InitWindow(N * WIDTH, M * HEIGHT + VOFFSET, "lab16 with raylib");
@@ -481,8 +544,6 @@ int main()
 	//Font InconsolataSemiBold = LoadFontEx("Inconsolata-SemiBold.ttf", 48, codepoints, 512);
 	Font InconsolataBold = LoadFontEx("Inconsolata-LGC-Bold.ttf", 36, codepoints, CPSIZE);
 	SetTextureFilter(InconsolataBold.texture, TEXTURE_FILTER_BILINEAR);
-	Font Consolas = LoadFontEx("consola.ttf", 24, codepoints, CPSIZE);
-	SetTextureFilter(Consolas.texture, TEXTURE_FILTER_BILINEAR);
 	//Font Arial = LoadFontEx("arial.ttf", 36, codepoints, CPSIZE);
 	//SetTextureFilter(Arial.texture, TEXTURE_FILTER_BILINEAR);
 
@@ -507,7 +568,13 @@ int main()
 		//------------------------------------------------------------------
 		if (errorCode == OK)
 		{
-			handleKeys();
+			if (player_turn) {
+				handleKeys();
+			}
+			else {
+				player_turn = true;
+				moveEnemy();
+			}
 
 			if (editMap) {
 				mousePos = GetMousePosition();
@@ -527,11 +594,11 @@ int main()
 			//------------------------------------------------------------------
 			// Update Nuklear context
 			//------------------------------------------------------------------
-			/*UpdateNuklear(ctx);
+			UpdateNuklear(ctx);
 
 			callNKErrorBoxes(ctx);
 
-			nk_end(ctx);*/
+			nk_end(ctx);
 		}
 		
 		//------------------------------------------------------------------
@@ -543,7 +610,11 @@ int main()
 
 		drawMap();
 		drawPlayer();
-		drawBottomBar(Consolas, 24);
+		drawEnemy(InconsolataBold);
+		drawBottomBar(InconsolataBold, 24);
+
+		const Rectangle RoundRect = { 100, 250, 185, 36 };
+		//DrawRectangleRoundedLinesEx(RoundRect, 0.3f, 20, 1, BLACK);
 
 		if (editMap) {
 			Rectangle rec = {
@@ -569,12 +640,12 @@ int main()
 
 		if (errorCode > OK) {
 			// Render the Nuklear GUI
-			//DrawNuklear(ctx);
+			DrawNuklear(ctx);
 
 			//drawRayguiErrorBoxes();
 		}
 
-		DrawTextEx(Consolas, u8"Файл не найден\nПопробуйте сначала сохранить игру", (Vector2) { 100, 100 }, 24, 0, BLACK);
+		//DrawTextEx(InconsolataBold, u8"Файл не найден\nПопробуйте сначала сохранить игру", (Vector2) { 100, 100 }, 24, 0, BLACK);
 
 		// show mouse position
 		//DrawText(TextFormat("%.1f %.1f", mousePos.x, mousePos.y), 5, M * HEIGHT - 30, 30, ORANGE);

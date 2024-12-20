@@ -322,7 +322,7 @@ void drawBottomBar(HDC hdc) {
     RECT helprect = { WIDTH * N - 550 , HEIGHT * M, WIDTH * N - WIDTH / 4, HEIGHT * M + VOFFSET };
 
     HFONT hFont = CreateFontW(24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
-        CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, TEXT("Consolas"));
+        CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, TEXT("consolas"));
     SelectObject(hdc, hFont);
 
     SetTextColor(hdc, RGB(78, 201, 176));

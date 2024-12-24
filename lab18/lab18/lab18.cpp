@@ -340,24 +340,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_KEYDOWN:
-    {
-        switch (wParam)
         {
-        case VK_SPACE:
-            netToggle = !netToggle;
-            break;
-        default:
-            trmode++;
-            hgmode++;
-            rbmode++;
-            if (trmode > 5) trmode = 0;
-            if (hgmode > 7) hgmode = 0;
-            if (rbmode > 3) rbmode = 0;
-            break;
+            switch (wParam)
+            {
+            case VK_SPACE:
+                netToggle = !netToggle;
+                break;
+            default:
+                trmode++;
+                hgmode++;
+                rbmode++;
+                if (trmode > 5) trmode = 0;
+                if (hgmode > 7) hgmode = 0;
+                if (rbmode > 3) rbmode = 0;
+                break;
+            }
+            InvalidateRect(hWnd, NULL, TRUE);
         }
-        InvalidateRect(hWnd, NULL, TRUE);
-    }
-    break;
+        break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;

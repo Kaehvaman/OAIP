@@ -55,7 +55,7 @@ int map[M][N] = {
 int player_x = 1;
 int player_y = 1;
 
-typedef enum { empty = 0, wall = 2, gold = 3 } obj_enum;
+typedef enum obj_enum { empty = 0, wall = 2, gold = 3 } obj_enum;
 // TODO: do something with "empty" object
 #define INVENTORY_SIZE 4
 int inventory[INVENTORY_SIZE] = { 0, 0, 15, 0 };
@@ -65,16 +65,52 @@ typedef enum { left, right, up, down } enum_ways;
 void movePlayer(enum_ways move) {
 	switch (move) {
 	case left:
-		if ((player_x > 0) and map[player_y][player_x - 1] != wall) player_x -= 1;
+		if (player_x > 0) {
+			if (map[player_y][player_x - 1] != wall) {
+				player_x -= 1;
+			}
+		}
+		else {
+			if (map[player_y][N - 1] != wall) {
+				player_x = N - 1;
+			}
+		}
 		break;
 	case right:
-		if ((player_x < N - 1) and map[player_y][player_x + 1] != wall) player_x += 1;
+		if (player_x < N - 1) {
+			if (map[player_y][player_x + 1] != wall) {
+				player_x += 1;
+			}
+		}
+		else {
+			if (map[player_y][0] != wall) {
+				player_x = 0;
+			}
+		}
 		break;
 	case up:
-		if ((player_y > 0) and map[player_y - 1][player_x] != wall) player_y -= 1;
+		if (player_y > 0) {
+			if (map[player_y - 1][player_x] != wall) {
+				player_y -= 1;
+			}
+		}
+		else {
+			if (map[M - 1][player_x] != wall) {
+				player_y = M - 1;
+			}
+		}
 		break;
 	case down:
-		if ((player_y < M - 1) and map[player_y + 1][player_x] != wall) player_y += 1;
+		if (player_y < M - 1) {
+			if (map[player_y + 1][player_x] != wall) {
+				player_y += 1;
+			}
+		}
+		else {
+			if (map[0][player_x] != wall) {
+				player_y = 0;
+			}
+		}
 		break;
 	}
 	if (map[player_y][player_x] == gold) {
@@ -465,7 +501,7 @@ void callNKErrorBoxes(struct nk_context* ctx) {
 int main()
 {
 	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
-	//SetConfigFlags(FLAG_MSAA_4X_HINT);
+	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
 	InitWindow(N * WIDTH, M * HEIGHT + VOFFSET, "lab16 with raylib");
 
@@ -481,8 +517,8 @@ int main()
 	//Font InconsolataSemiBold = LoadFontEx("Inconsolata-SemiBold.ttf", 48, codepoints, 512);
 	Font InconsolataBold = LoadFontEx("Inconsolata-LGC-Bold.ttf", 36, codepoints, CPSIZE);
 	SetTextureFilter(InconsolataBold.texture, TEXTURE_FILTER_BILINEAR);
-	Font Consolas = LoadFontEx("consola.ttf", 24, codepoints, CPSIZE);
-	SetTextureFilter(Consolas.texture, TEXTURE_FILTER_BILINEAR);
+	//Font Consolas = LoadFontEx("consola.ttf", 24, codepoints, CPSIZE);
+	//SetTextureFilter(Consolas.texture, TEXTURE_FILTER_BILINEAR);
 	//Font Arial = LoadFontEx("arial.ttf", 36, codepoints, CPSIZE);
 	//SetTextureFilter(Arial.texture, TEXTURE_FILTER_BILINEAR);
 
@@ -505,6 +541,9 @@ int main()
 		//------------------------------------------------------------------
 		// Update game logic
 		//------------------------------------------------------------------
+
+		printf("lol");
+
 		if (errorCode == OK)
 		{
 			handleKeys();
@@ -543,7 +582,7 @@ int main()
 
 		drawMap();
 		drawPlayer();
-		drawBottomBar(Consolas, 24);
+		drawBottomBar(InconsolataBold, 24);
 
 		if (editMap) {
 			Rectangle rec = {
@@ -571,10 +610,14 @@ int main()
 			// Render the Nuklear GUI
 			//DrawNuklear(ctx);
 
-			//drawRayguiErrorBoxes();
+			drawRayguiErrorBoxes();
 		}
 
-		DrawTextEx(Consolas, u8"Файл не найден\nПопробуйте сначала сохранить игру", (Vector2) { 100, 100 }, 24, 0, BLACK);
+		Rectangle roundRect = { 100, 250, 185, 36 };
+		DrawRectangleRounded(roundRect, 0.5f, 6, BLACK);
+		DrawRectangleRoundedLines(roundRect, 0.5f, 6, ORANGE);
+
+		//DrawTextEx(Consolas, u8"Файл не найден\nПопробуйте сначала сохранить игру", (Vector2) { 100, 100 }, 24, 0, BLACK);
 
 		// show mouse position
 		//DrawText(TextFormat("%.1f %.1f", mousePos.x, mousePos.y), 5, M * HEIGHT - 30, 30, ORANGE);
@@ -589,6 +632,7 @@ int main()
 
 	//UnloadFont(InconsolataRegular);
 	UnloadFont(InconsolataBold);
+	//UnloadFont(Consolas);
 	//UnloadFont(Arial);
 	//UnloadFont(InconsolataBold);
 

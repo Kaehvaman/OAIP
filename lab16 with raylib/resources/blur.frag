@@ -37,8 +37,8 @@ void main()
     vec4 red = vec4(1.0, 0.5, 0.5, 1.0);
     vec4 blue = vec4(0.0, 0.5, 0.5, 1.0);
 
-    finalColor = mix(red, blue, (sin(fragTexCoord.x * 24 + seconds * 4.0) + 1.0) / 2.0);
+    //finalColor = mix(red, blue, (sin(fragTexCoord.x * 24 + seconds * 4.0) + 1.0) / 2.0);
 
-    //finalColor = texelColor;
+    finalColor = texelColor;
     //finalColor = vec4((sin(fragTexCoord.x * 24 + seconds * 4.0) + 1.0) / 2.0, 0.5, 0.5, 1.0);
 }

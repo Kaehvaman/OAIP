@@ -284,7 +284,7 @@ void load() {
 			u8"Невозможно создать файл\nПроверьте целостность сохранения",
 			u8"ok",
 			"error", 1);
-		errorCode = loadError1;
+		//errorCode = loadError1;
 		return;
 	}
 	int m, n;
@@ -501,9 +501,14 @@ void callNKErrorBoxes(struct nk_context* ctx) {
 int main()
 {
 	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
-	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+	//SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
-	InitWindow(N * WIDTH, M * HEIGHT + VOFFSET, "lab16 with raylib");
+	const int screenWidth = N * WIDTH;
+	const int screenHeight = M * HEIGHT + VOFFSET;
+	const float screenWidthF = (float)screenWidth;
+	const float screenHeightF = (float)screenHeight;
+
+	InitWindow(screenWidth, screenHeight, "lab16 with raylib");
 
 	SetTargetFPS(60);
 
@@ -521,6 +526,15 @@ int main()
 	//SetTextureFilter(Consolas.texture, TEXTURE_FILTER_BILINEAR);
 	//Font Arial = LoadFontEx("arial.ttf", 36, codepoints, CPSIZE);
 	//SetTextureFilter(Arial.texture, TEXTURE_FILTER_BILINEAR);
+
+	RenderTexture2D canvas = LoadRenderTexture(screenWidth, screenHeight);
+
+	Shader blur = LoadShader(0, "blur.frag");
+	int renderWidthLoc = GetShaderLocation(blur, "renderWidth");
+	int renderHeightLoc = GetShaderLocation(blur, "renderHeight");
+	int secondsLoc = GetShaderLocation(blur, "seconds");
+	SetShaderValue(blur, renderWidthLoc, &screenWidthF, SHADER_UNIFORM_FLOAT);
+	SetShaderValue(blur, renderHeightLoc, &screenHeightF, SHADER_UNIFORM_FLOAT);
 
 	GuiSetFont(InconsolataBold);
 	GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
@@ -541,8 +555,6 @@ int main()
 		//------------------------------------------------------------------
 		// Update game logic
 		//------------------------------------------------------------------
-
-		printf("lol");
 
 		if (errorCode == OK)
 		{
@@ -578,7 +590,9 @@ int main()
 		//------------------------------------------------------------------
 		BeginDrawing();
 		// Setup the back buffer for drawing (clear color and depth buffers)
-		ClearBackground(WHITE);
+		//ClearBackground(WHITE);
+		
+		//BeginTextureMode(canvas);
 
 		drawMap();
 		drawPlayer();
@@ -610,12 +624,32 @@ int main()
 			// Render the Nuklear GUI
 			//DrawNuklear(ctx);
 
-			drawRayguiErrorBoxes();
+			//drawRayguiErrorBoxes();
 		}
 
-		Rectangle roundRect = { 100, 250, 185, 36 };
-		DrawRectangleRounded(roundRect, 0.5f, 6, BLACK);
-		DrawRectangleRoundedLines(roundRect, 0.5f, 6, ORANGE);
+		BeginTextureMode(canvas);
+		{
+			ClearBackground((Color) { 255, 255, 255, 0 });
+			//ClearBackground(BLANK);
+			Rectangle roundRect = { 100, 260, 185, 36 };
+			DrawRectangleRounded(roundRect, 0.5f, 6, BLACK);
+			DrawRectangleRoundedLines(roundRect, 0.5f, 6, ORANGE);
+		}
+		EndTextureMode();
+
+		float timeF = (float)GetTime();
+		SetShaderValue(blur, secondsLoc, &timeF, SHADER_UNIFORM_FLOAT);
+
+		BeginShaderMode(blur);
+		{
+			Rectangle rec = { 0, 0, canvas.texture.width, -canvas.texture.height };
+			DrawTextureRec(canvas.texture, rec, (Vector2) { 0.0f, 0.0f }, WHITE);
+		}
+		EndShaderMode();
+
+		//drawBottomBar(InconsolataBold, 24);
+
+		//DrawTextureEx(canvas.texture, (Vector2) { 0.0f, 0.0f }, 0.0f, 1.0f, WHITE);
 
 		//DrawTextEx(Consolas, u8"Файл не найден\nПопробуйте сначала сохранить игру", (Vector2) { 100, 100 }, 24, 0, BLACK);
 
@@ -635,6 +669,9 @@ int main()
 	//UnloadFont(Consolas);
 	//UnloadFont(Arial);
 	//UnloadFont(InconsolataBold);
+
+	UnloadShader(blur);
+	UnloadRenderTexture(canvas);
 
 	// De-initialize the Nuklear GUI
 	UnloadNuklear(ctx);

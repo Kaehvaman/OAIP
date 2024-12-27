@@ -140,6 +140,7 @@
     <ClInclude Include="..\include\raylib.h" />
     <ClInclude Include="..\include\raymath.h" />
     <ClInclude Include="..\include\resource_dir.h" />
+    <ClInclude Include="..\include\rlgl.h" />
     <ClInclude Include="..\include\tinyfiledialogs.h" />
     <ClInclude Include="..\include\windows_functions.h" />
     <ClInclude Include="resource.h" />

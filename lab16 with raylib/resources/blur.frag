@@ -14,7 +14,7 @@ out vec4 finalColor;
 // NOTE: Add here your custom variables
 
 // NOTE: values must be passed from code
-uniform float renderWidth;
+uniform float renderWidth = 750;
 uniform float renderHeight;
 uniform float seconds;
 
@@ -28,17 +28,17 @@ void main()
 
     for (int i = 1; i < 3; i++)
     {
-        texelColor += texture(texture0, fragTexCoord + vec2(offset[i], offset[i]) / renderWidth).rgba * weight[i] / 2;
-        texelColor += texture(texture0, fragTexCoord - vec2(offset[i], offset[i]) / renderWidth).rgba * weight[i] / 2;
-        texelColor += texture(texture0, fragTexCoord + vec2(-offset[i], offset[i]) / renderWidth).rgba * weight[i] / 2;
-        texelColor += texture(texture0, fragTexCoord - vec2(-offset[i], offset[i]) / renderWidth).rgba * weight[i] / 2;
+        texelColor += texture(texture0, fragTexCoord + vec2(offset[i], 0.0) / renderWidth).rgba * weight[i] / 2;
+        texelColor += texture(texture0, fragTexCoord + vec2(-offset[i], 0.0) / renderWidth).rgba * weight[i] / 2;
+        texelColor += texture(texture0, fragTexCoord + vec2(0.0, offset[i]) / renderWidth).rgba * weight[i] / 2;
+        texelColor += texture(texture0, fragTexCoord + vec2(0.0, -offset[i]) / renderWidth).rgba * weight[i] / 2;
     }
 
     vec4 red = vec4(1.0, 0.5, 0.5, 1.0);
     vec4 blue = vec4(0.0, 0.5, 0.5, 1.0);
 
-    finalColor = mix(red, blue, (sin(fragTexCoord.x * 24 + seconds * 4.0) + 1.0) / 2.0);
+    //finalColor = mix(red, blue, (sin(fragTexCoord.x * 24 + seconds * 4.0) + 1.0) / 2.0);
 
-    //finalColor = texelColor;
+    finalColor = texelColor;
     //finalColor = vec4((sin(fragTexCoord.x * 24 + seconds * 4.0) + 1.0) / 2.0, 0.5, 0.5, 1.0);
 }

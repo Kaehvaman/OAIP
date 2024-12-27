@@ -508,6 +508,7 @@ int main()
 	const int screenHeight = M * HEIGHT + VOFFSET;
 	const float screenWidthF = (float)screenWidth;
 	const float screenHeightF = (float)screenHeight;
+	const Vector2 resolution = { screenWidthF, screenHeightF };
 
 	InitWindow(screenWidth, screenHeight, "lab16 with raylib");
 
@@ -543,39 +544,20 @@ int main()
 	SetShaderValue(blur, blurRenderWidthLoc, &screenWidthF, SHADER_UNIFORM_FLOAT);
 	SetShaderValue(blur, blurRenderHeightLoc, &screenHeightF, SHADER_UNIFORM_FLOAT);
 
-	Shader water = LoadShader(0, "water.frag");
-	int waterRenderWidthLoc = GetShaderLocation(water, "renderWidth");
-	int waterRenderHeightLoc = GetShaderLocation(water, "renderHeight");
-	int intensityLoc = GetShaderLocation(water, "intensity");
-	int wavesLoc = GetShaderLocation(water, "waves");
-	int speedVLoc = GetShaderLocation(water, "speedV");
-	int speedHLoc = GetShaderLocation(water, "speedH");
-	int waterSecondsLoc = GetShaderLocation(water, "seconds");
-	float waves = 60.0f;
-	float intensity = 1.0f;
-	float speedV = 2.0f;
-	float speedH = 2.0f;
-	SetShaderValue(water, wavesLoc, &waves, SHADER_UNIFORM_FLOAT);
-	SetShaderValue(water, intensityLoc, &intensity, SHADER_UNIFORM_FLOAT);
-	SetShaderValue(water, speedVLoc, &speedV, SHADER_UNIFORM_FLOAT);
-	SetShaderValue(water, speedHLoc, &speedH, SHADER_UNIFORM_FLOAT);
-	SetShaderValue(water, waterRenderWidthLoc, &screenWidthF, SHADER_UNIFORM_FLOAT);
-	SetShaderValue(water, waterRenderHeightLoc, &screenHeightF, SHADER_UNIFORM_FLOAT);
-
-	Texture waterbump = LoadTexture("waterbump_blur.png");
-	SetTextureFilter(waterbump, TEXTURE_FILTER_BILINEAR);
 	Shader watershader = LoadShader(0, "watershader.frag");
-	int xWaterBumpMapLoc = GetShaderLocation(watershader, "texture1");
+	int waterBumpMapLoc = GetShaderLocation(watershader, "waterBumpMap");
 	int watershaderSecondsLoc = GetShaderLocation(watershader, "seconds");
-	int iResolutionLoc = GetShaderLocation(watershader, "iResolution");
-	Vector2 iResolution = { screenWidthF, screenHeightF };
-	SetShaderValue(watershader, iResolutionLoc, &iResolution, SHADER_UNIFORM_VEC2);
-	SetShaderValueTexture(watershader, xWaterBumpMapLoc, waterbump);
+	int waterResolutionLoc = GetShaderLocation(watershader, "resolution");
+	SetShaderValue(watershader, waterResolutionLoc, &resolution, SHADER_UNIFORM_VEC2);
+
+	Texture waterBump = LoadTexture("waterbump_blur.png");
+	SetTextureFilter(waterBump, TEXTURE_FILTER_BILINEAR);
+	SetShaderValueTexture(watershader, waterBumpMapLoc, waterBump);
 
 	Shader blur13 = LoadShader(0, "blur13.frag");
 	int blur13resolution = GetShaderLocation(blur13, "resolution");
 	int blur13direction = GetShaderLocation(blur13, "direction");
-	SetShaderValue(blur13, blur13resolution, &iResolution, SHADER_UNIFORM_VEC2);
+	SetShaderValue(blur13, blur13resolution, &resolution, SHADER_UNIFORM_VEC2);
 
 	GuiSetFont(InconsolataBold);
 	GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
@@ -598,22 +580,6 @@ int main()
 		//------------------------------------------------------------------
 
 		float frametime = GetFrameTime();
-
-		if (IsKeyPressed(KEY_I)) {
-			speedV -= 1.0f;
-		}
-		if (IsKeyPressed(KEY_K)) {
-			speedV += 1.0f;
-		}
-		if (IsKeyPressed(KEY_J)) {
-			speedH -= 1.0f;
-		}
-		if (IsKeyPressed(KEY_L)) {
-			speedH += 1.0f;
-		}
-		SetShaderValue(water, speedVLoc, &speedV, SHADER_UNIFORM_FLOAT);
-		SetShaderValue(water, speedHLoc, &speedH, SHADER_UNIFORM_FLOAT);
-
 
 		if (errorCode == OK)
 		{
@@ -699,18 +665,16 @@ int main()
 
 		float timeF = (float)GetTime();
 		SetShaderValue(blur, blurSecondsLoc, &timeF, SHADER_UNIFORM_FLOAT);
-		SetShaderValue(water, waterSecondsLoc, &timeF, SHADER_UNIFORM_FLOAT);
 		SetShaderValue(watershader, watershaderSecondsLoc, &timeF, SHADER_UNIFORM_FLOAT);
 
 		Rectangle rec = { 0, 0, (float)canvas.texture.width, (float)(-canvas.texture.height) };
 		BeginShaderMode(watershader);
 		{
-			SetShaderValueTexture(watershader, xWaterBumpMapLoc, waterbump);
+			SetShaderValueTexture(watershader, waterBumpMapLoc, waterBump);
 			DrawTextureRec(canvas.texture, rec, (Vector2) { 0.0f, 0.0f }, WATERBLUE);
 		}
 		EndShaderMode();
 		
-
 		//BeginTextureMode(canvasBlurX);
 		//{
 		//	BeginShaderMode(blur13);
@@ -719,7 +683,7 @@ int main()
 		//		{
 		//			Vector2 dir = { 0.25f, 0.0f };
 		//			SetShaderValue(blur13, blur13direction, &dir, SHADER_UNIFORM_VEC2);
-		//			SetShaderValueTexture(watershader, xWaterBumpMapLoc, waterbump);
+		//			SetShaderValueTexture(watershader, waterBumpMapLoc, waterBump);
 		//			DrawTextureRec(canvas.texture, rec, (Vector2) { 0.0f, 0.0f }, WATERBLUE);
 		//		}
 		//		EndShaderMode();
@@ -764,9 +728,8 @@ int main()
 	UnloadRenderTexture(canvas);
 
 	UnloadShader(blur);
-	UnloadShader(water);
 	UnloadShader(watershader);
-	UnloadTexture(waterbump);
+	UnloadTexture(waterBump);
 	
 	// De-initialize the Nuklear GUI
 	UnloadNuklear(ctx);

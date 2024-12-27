@@ -155,6 +155,11 @@
   <ItemGroup>
     <Image Include="..\resources\logo.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\resources\blur.frag" />
+    <None Include="..\resources\blur13.frag" />
+    <None Include="..\resources\watershader.frag" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

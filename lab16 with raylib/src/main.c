@@ -532,6 +532,10 @@ int main()
 	SetTextureFilter(canvas.texture, TEXTURE_FILTER_BILINEAR);
 	SetTextureWrap(canvas.texture, TEXTURE_WRAP_CLAMP);
 
+	RenderTexture2D canvasBlurX = LoadRenderTexture(screenWidth, screenHeight);
+	SetTextureFilter(canvasBlurX.texture, TEXTURE_FILTER_BILINEAR);
+	SetTextureWrap(canvasBlurX.texture, TEXTURE_WRAP_CLAMP);
+
 	Shader blur = LoadShader(0, "blur.frag");
 	int blurRenderWidthLoc = GetShaderLocation(blur, "renderWidth");
 	int blurRenderHeightLoc = GetShaderLocation(blur, "renderHeight");
@@ -567,6 +571,11 @@ int main()
 	Vector2 iResolution = { screenWidthF, screenHeightF };
 	SetShaderValue(watershader, iResolutionLoc, &iResolution, SHADER_UNIFORM_VEC2);
 	SetShaderValueTexture(watershader, xWaterBumpMapLoc, waterbump);
+
+	Shader blur13 = LoadShader(0, "blur13.frag");
+	int blur13resolution = GetShaderLocation(blur13, "resolution");
+	int blur13direction = GetShaderLocation(blur13, "direction");
+	SetShaderValue(blur13, blur13resolution, &iResolution, SHADER_UNIFORM_VEC2);
 
 	GuiSetFont(InconsolataBold);
 	GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
@@ -639,10 +648,11 @@ int main()
 		// Draw
 		//------------------------------------------------------------------
 		BeginDrawing();
-		// Setup the back buffer for drawing (clear color and depth buffers)
-		ClearBackground(WHITE);
 		
 		BeginTextureMode(canvas);
+
+		// Setup the back buffer for drawing (clear color and depth buffers)
+		ClearBackground(MAGENTA);
 
 		drawMap();
 		drawPlayer();
@@ -699,6 +709,34 @@ int main()
 			DrawTextureRec(canvas.texture, rec, (Vector2) { 0.0f, 0.0f }, WATERBLUE);
 		}
 		EndShaderMode();
+		
+
+		//BeginTextureMode(canvasBlurX);
+		//{
+		//	BeginShaderMode(blur13);
+		//	{
+		//		BeginShaderMode(watershader);
+		//		{
+		//			Vector2 dir = { 0.25f, 0.0f };
+		//			SetShaderValue(blur13, blur13direction, &dir, SHADER_UNIFORM_VEC2);
+		//			SetShaderValueTexture(watershader, xWaterBumpMapLoc, waterbump);
+		//			DrawTextureRec(canvas.texture, rec, (Vector2) { 0.0f, 0.0f }, WATERBLUE);
+		//		}
+		//		EndShaderMode();
+		//	}
+		//	EndShaderMode();
+		//}
+		//EndTextureMode();
+
+
+		//BeginShaderMode(blur13);
+		//{
+		//	Vector2 dir = { 0.0f, 0.25f };
+		//	SetShaderValue(blur13, blur13direction, &dir, SHADER_UNIFORM_VEC2);
+		//	DrawTextureRec(canvasBlurX.texture, rec, (Vector2) { 0.0f, 0.0f }, WHITE);
+		//}
+		//EndShaderMode();
+
 
 		//drawBottomBar(InconsolataBold, 24);
 

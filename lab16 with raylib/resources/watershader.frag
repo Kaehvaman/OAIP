@@ -8,41 +8,64 @@ uniform vec4 colDiffuse;    // Fragment input color diffuse (multiplied by textu
 
 // Custom variables
 uniform sampler2D texture1; // water bump map
-//uniform vec2 xBumpPos;
-//uniform vec2 xBumpScale;
-//uniform vec2 xUvOffset;
 
-uniform float xBlurDistance = 0.6 / 750;
+uniform float xBlurDistance = 0.5 / 750;
 uniform float xWaveWidth = 0.1;
 uniform float xWaveHeight = 0.1;
 uniform float seconds;
 
-uniform vec4 waterColor = vec4(180.0 / 255.0, 230.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0);
+uniform vec2 iResolution;
+
+//uniform vec4 waterColor = vec4(0.8, 0.95, 1.0, 1.0);
+
+vec4 getAverageColor(sampler2D iTexture, vec2 uv, float power)
+{
+    vec4 color = vec4(0);
+    for (int x = -1; x < 2; x++)
+    {
+        for (int y = -1; y < 2; y++)
+        {
+            vec2 offset = vec2(x,y) / iResolution.xy * power;
+            color += texture(iTexture, uv + offset);
+        }
+    }
+    
+    color /= 9.0;
+    
+    return color;
+}
+
 
 void main()
 {
-	//vec4 bumpColor = texture(xWaterBumpMap, xUvOffset + xBumpPos * xBumpScale);
-	//bumpColor = (bumpColor + texture(xWaterBumpMap, xUvOffset + xBumpPos*2 * xBumpScale)) * 0.5;
 	vec4 bumpColor = texture(texture1, fragTexCoord + sin(seconds / 2.0) / 20.0);
-	bumpColor = (bumpColor + texture(texture1, fragTexCoord*2 + cos(seconds / 2.0) / 20.0)) * 0.5;
+	bumpColor = (bumpColor + texture(texture1, fragTexCoord*1.5 + cos(seconds / 2.0) / 20.0)) * 0.5;
 
 	vec2 samplePos = fragTexCoord;
 
 	samplePos.x += (bumpColor.r - 0.5) * xWaveWidth * fragColor.r;	
 	samplePos.y += (bumpColor.g - 0.5) * xWaveHeight * fragColor.g;
 
-	vec4 result;
-	result = texture(texture0, vec2(samplePos.x + xBlurDistance, samplePos.y + xBlurDistance));
-    result += texture(texture0, vec2(samplePos.x - xBlurDistance, samplePos.y - xBlurDistance));
-    result += texture(texture0, vec2(samplePos.x + xBlurDistance, samplePos.y - xBlurDistance));
-    result += texture(texture0, vec2(samplePos.x - xBlurDistance, samplePos.y + xBlurDistance));
-	
-    result = result * 0.25;
+//	vec4 result = texture(texture0, samplePos);
+//	result += texture(texture0, vec2(samplePos.x + xBlurDistance, samplePos.y));
+//    result += texture(texture0, vec2(samplePos.x - xBlurDistance, samplePos.y));
+//    result += texture(texture0, vec2(samplePos.x, samplePos.y - xBlurDistance));
+//    result += texture(texture0, vec2(samplePos.x, samplePos.y + xBlurDistance));
+//	result += texture(texture0, vec2(samplePos.x + xBlurDistance, samplePos.y + xBlurDistance));
+//    result += texture(texture0, vec2(samplePos.x - xBlurDistance, samplePos.y - xBlurDistance));
+//    result += texture(texture0, vec2(samplePos.x + xBlurDistance, samplePos.y - xBlurDistance));
+//    result += texture(texture0, vec2(samplePos.x - xBlurDistance, samplePos.y + xBlurDistance));
+//	
+//    result = result / 9;
+
+    vec4 result = getAverageColor(texture0, samplePos, 0.7);
 	
 	//vec4 result = texture(texture0, samplePos);
 
-	result.a = fragColor.a;
-	result = mix(result, result * waterColor, fragColor.b);
+	//result.a = texture(texture0, samplePos).a;
+	//result = mix(result, result * waterColor, fragColor.b);
+	
+    result = result*colDiffuse*fragColor;
 
 	finalColor = result;
 }

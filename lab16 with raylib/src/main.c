@@ -32,6 +32,7 @@
 #define PUREBLUE (Color) { 0, 0, 255, 255 }
 #define BLACKGRAY (Color) {30, 30, 30, 255}
 #define VSGREEN (Color) {78, 201, 176, 255}
+#define WATERBLUE CLITERAL(Color){200, 240, 255, 255}
 
 // Коды ячеек:
 // 0 - свободна
@@ -500,7 +501,7 @@ void callNKErrorBoxes(struct nk_context* ctx) {
 #define CPSIZE 213
 int main()
 {
-	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+	SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 	//SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
 	const int screenWidth = N * WIDTH;
@@ -557,10 +558,15 @@ int main()
 	SetShaderValue(water, waterRenderWidthLoc, &screenWidthF, SHADER_UNIFORM_FLOAT);
 	SetShaderValue(water, waterRenderHeightLoc, &screenHeightF, SHADER_UNIFORM_FLOAT);
 
-	Texture waterbump = LoadTexture("waterbump.png");
+	Texture waterbump = LoadTexture("waterbump_blur.png");
+	SetTextureFilter(waterbump, TEXTURE_FILTER_BILINEAR);
 	Shader watershader = LoadShader(0, "watershader.frag");
 	int xWaterBumpMapLoc = GetShaderLocation(watershader, "texture1");
 	int watershaderSecondsLoc = GetShaderLocation(watershader, "seconds");
+	int iResolutionLoc = GetShaderLocation(watershader, "iResolution");
+	Vector2 iResolution = { screenWidthF, screenHeightF };
+	SetShaderValue(watershader, iResolutionLoc, &iResolution, SHADER_UNIFORM_VEC2);
+	SetShaderValueTexture(watershader, xWaterBumpMapLoc, waterbump);
 
 	GuiSetFont(InconsolataBold);
 	GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
@@ -634,7 +640,7 @@ int main()
 		//------------------------------------------------------------------
 		BeginDrawing();
 		// Setup the back buffer for drawing (clear color and depth buffers)
-		//ClearBackground(BLACK);
+		ClearBackground(WHITE);
 		
 		BeginTextureMode(canvas);
 
@@ -690,7 +696,7 @@ int main()
 		BeginShaderMode(watershader);
 		{
 			SetShaderValueTexture(watershader, xWaterBumpMapLoc, waterbump);
-			DrawTextureRec(canvas.texture, rec, (Vector2) { 0.0f, 0.0f }, WHITE);
+			DrawTextureRec(canvas.texture, rec, (Vector2) { 0.0f, 0.0f }, WATERBLUE);
 		}
 		EndShaderMode();
 

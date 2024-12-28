@@ -20,11 +20,12 @@
 #pragma warning(disable: 4116)
 #include "raylib-nuklear.h"
 
+Vector2 scaleDPI = { 1.0f, 1.0f };
 #define M 10
 #define N 15
-#define HEIGHT 50
-#define WIDTH 50
-#define VOFFSET 52
+#define HEIGHT (int)(50 * scaleDPI.y)
+#define WIDTH (int)(50 * scaleDPI.x)
+#define VOFFSET (int)(52 * scaleDPI.y)
 
 #define FWIDTH (float)WIDTH
 #define FHEIGHT (float)HEIGHT
@@ -234,9 +235,9 @@ void drawBottomBar(Font font, float fontSize) {
 	if (selected_element == gold) gold_string[0] = '>';
 	else if (selected_element == wall) wall_string[0] = '>';
 
-	Vector2 goldpos = { WIDTH / 4, HEIGHT * M };
-	Vector2 wallpos = { WIDTH / 4, HEIGHT * M + fontSize };
-	Vector2 helppos = { WIDTH * N - 550 , HEIGHT * M };
+	Vector2 goldpos = { FWIDTH / 4, FHEIGHT * M };
+	Vector2 wallpos = { FWIDTH / 4, FHEIGHT * M + fontSize };
+	Vector2 helppos = { FWIDTH * N - MeasureTextEx(font, help_string, fontSize, 0).x - 20 * scaleDPI.x, FHEIGHT * M};
 
 	DrawTextEx(font, gold_string, goldpos, fontSize, 0, VSGREEN);
 	DrawTextEx(font, wall_string, wallpos, fontSize, 0, VSGREEN);
@@ -391,7 +392,7 @@ void handleKeys() {
 }
 
 void drawRayguiErrorBoxes() {
-	const Rectangle errorBoxRect = { N * WIDTH / 2 - 200, M * HEIGHT / 2 - 75, 400, 150 };
+	const Rectangle errorBoxRect = { N * FWIDTH / 2 - 200, M * FHEIGHT / 2 - 75, 400, 150 };
 	int btn = -1;
 
 	switch (errorCode)
@@ -436,7 +437,7 @@ int nk_error_box(struct nk_context* ctx, const char* title, const char* error, c
 {
 	int result = -1;
 	if (nk_begin(ctx, title,
-		nk_rect(N * WIDTH / 2 - 200, M * HEIGHT / 2 - 72, 400, 144),
+		nk_rect(N * FWIDTH / 2 - 200, M * FHEIGHT / 2 - 72, 400, 144),
 		NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR))
 	{
 		nk_layout_row_dynamic(ctx, 24, 1);
@@ -501,16 +502,23 @@ void callNKErrorBoxes(struct nk_context* ctx) {
 #define CPSIZE 213
 int main()
 {
-	SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 	//SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+	
+	InitWindow( 1280,  720, "lab16 with raylib");
+	scaleDPI = GetWindowScaleDPI();
 
-	const int screenWidth = N * WIDTH;
-	const int screenHeight = M * HEIGHT + VOFFSET;
-	const float screenWidthF = (float)screenWidth;
-	const float screenHeightF = (float)screenHeight;
-	const Vector2 resolution = { screenWidthF, screenHeightF };
+	int monitor = GetCurrentMonitor();
+	int monitorCenterX = GetMonitorWidth(monitor) / 2;
+	int monitorCenterY = GetMonitorHeight(monitor) / 2;
 
-	InitWindow(screenWidth, screenHeight, "lab16 with raylib");
+	int screenWidth = N * WIDTH;
+	int screenHeight = M * HEIGHT + VOFFSET;
+	float screenWidthF = (float)screenWidth;
+	float screenHeightF = (float)screenHeight;
+	Vector2 resolution = { screenWidthF, screenHeightF };
+
+	SetWindowSize(screenWidth, screenHeight);
+	SetWindowPosition(monitorCenterX - screenWidth/2, monitorCenterY - screenHeight/2);
 
 	SetTargetFPS(60);
 
@@ -530,7 +538,7 @@ int main()
 	//SetTextureFilter(Arial.texture, TEXTURE_FILTER_BILINEAR);
 
 	RenderTexture2D canvas = LoadRenderTexture(screenWidth, screenHeight);
-	SetTextureFilter(canvas.texture, TEXTURE_FILTER_BILINEAR);
+	//SetTextureFilter(canvas.texture, TEXTURE_FILTER_BILINEAR);
 	SetTextureWrap(canvas.texture, TEXTURE_WRAP_CLAMP);
 
 	RenderTexture2D canvasBlurX = LoadRenderTexture(screenWidth, screenHeight);
@@ -547,12 +555,11 @@ int main()
 	Shader watershader = LoadShader(0, "watershader.frag");
 	int waterBumpMapLoc = GetShaderLocation(watershader, "waterBumpMap");
 	int watershaderSecondsLoc = GetShaderLocation(watershader, "seconds");
-	int waterResolutionLoc = GetShaderLocation(watershader, "resolution");
-	SetShaderValue(watershader, waterResolutionLoc, &resolution, SHADER_UNIFORM_VEC2);
+	int watershaderResolutionLoc = GetShaderLocation(watershader, "resolution");
+	SetShaderValue(watershader, watershaderResolutionLoc, &resolution, SHADER_UNIFORM_VEC2);
 
 	Texture waterBump = LoadTexture("waterbump_blur.png");
 	SetTextureFilter(waterBump, TEXTURE_FILTER_BILINEAR);
-	SetShaderValueTexture(watershader, waterBumpMapLoc, waterBump);
 
 	Shader blur13 = LoadShader(0, "blur13.frag");
 	int blur13resolution = GetShaderLocation(blur13, "resolution");
@@ -578,7 +585,6 @@ int main()
 		//------------------------------------------------------------------
 		// Update game logic
 		//------------------------------------------------------------------
-
 		float frametime = GetFrameTime();
 
 		if (errorCode == OK)
@@ -622,7 +628,7 @@ int main()
 
 		drawMap();
 		drawPlayer();
-		drawBottomBar(InconsolataBold, 24);
+		drawBottomBar(InconsolataBold, 24 * scaleDPI.y);
 
 		if (editMap) {
 			Rectangle rec = {
@@ -668,12 +674,12 @@ int main()
 		SetShaderValue(watershader, watershaderSecondsLoc, &timeF, SHADER_UNIFORM_FLOAT);
 
 		Rectangle rec = { 0, 0, (float)canvas.texture.width, (float)(-canvas.texture.height) };
-		BeginShaderMode(watershader);
+		//BeginShaderMode(watershader);
 		{
 			SetShaderValueTexture(watershader, waterBumpMapLoc, waterBump);
-			DrawTextureRec(canvas.texture, rec, (Vector2) { 0.0f, 0.0f }, WATERBLUE);
+			DrawTextureRec(canvas.texture, rec, (Vector2) { 0.0f, 0.0f }, WHITE);
 		}
-		EndShaderMode();
+		//EndShaderMode();
 		
 		//BeginTextureMode(canvasBlurX);
 		//{

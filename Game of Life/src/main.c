@@ -2,9 +2,11 @@
 #include "raymath.h"
 #include <stdbool.h>
 #include <iso646.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define MAP_X 20
-#define MAP_Y 20
+#define MAP_X 100
+#define MAP_Y 50
 #define CELL_SIZE 20
 #define FCELL_SIZE (float)CELL_SIZE
 
@@ -19,11 +21,11 @@ static bool map[MAP_X][MAP_Y] = { 0 };
 static bool tempMap[MAP_X][MAP_Y] = { 0 };
 
 static inline int checkCell(int x, int y) {
-    if (x > 0 and y > 0 and x < MAP_X - 1 and y < MAP_Y - 1) {
-        return map[x][y];
+    if (x < 0 or y < 0 or x > MAP_X - 1 or y > MAP_Y - 1) {
+        return 0;
     }
     else {
-        return 0;
+        return map[x][y];
     }
 }
 
@@ -45,39 +47,40 @@ void celluralAutomata()
             if (neighbours == 3) {
                 tempMap[x][y] = true;
             }
-            else if (neighbours < 2 or neighbours > 3) {
-                tempMap[x][y] = false;
+            else if (neighbours == 2) {
+                tempMap[x][y] = map[x][y];
             }
             else {
-                tempMap[x][y] = map[x][y];
+                tempMap[x][y] = false;
             }
 
         }
     }
-    for (int x = 0; x < MAP_X; x++) {
-        for (int y = 0; y < MAP_Y; y++) {
-            map[x][y] = tempMap[x][y];
-        }
-    }
+    memcpy(map, tempMap, MAP_X * MAP_Y * sizeof(bool));
 }
 
 void drawMap()
 {
     for (int x = 0; x < MAP_X; x++) {
         for (int y = 0; y < MAP_Y; y++) {
-            int posX = x * CELL_SIZE;
-            int posY = y * CELL_SIZE;
-
-            Color color;
             if (map[x][y]) {
-                color = BLACK;
+                int posX = x * CELL_SIZE;
+                int posY = y * CELL_SIZE;
+                DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, BLACK);
             }
-            else {
-                color = RAYWHITE;
-            }
-
-            DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, color);
         }
+    }
+}
+
+void drawNet() {
+    for (int i = 0; i <= MAP_X * CELL_SIZE; i += CELL_SIZE) {
+        DrawLine(i, 0, i, MAP_Y * CELL_SIZE, GRAY);
+        DrawLine(i+1, 0, i+1, MAP_Y * CELL_SIZE, GRAY);
+    }
+
+    for (int i = 0; i <= MAP_Y * CELL_SIZE; i += CELL_SIZE) {
+        DrawLine(0, i, MAP_X * CELL_SIZE, i, GRAY);
+        DrawLine(0, i-1, MAP_X * CELL_SIZE, i-1, GRAY);
     }
 }
 
@@ -91,20 +94,26 @@ int main()
     const int screenWidth = MAP_X * CELL_SIZE;
     const int screenHeight = MAP_Y * CELL_SIZE + BOTTOM_BAR_HEIGHT;
 
+    SetConfigFlags(FLAG_VSYNC_HINT);
+
     InitWindow(screenWidth, screenHeight, "Game of Life");
 
-    SetTargetFPS(15);
+    //SetTargetFPS(60);
 
     Vector2 mousePos = { 0 };
     int mouseCellX = 0;
     int mouseCellY = 0;
 
     bool editMap = true;
+    bool netToggle = false;
 
     while (!WindowShouldClose())
     {
         if (IsKeyPressed(KEY_SPACE)) {
             editMap = !editMap;
+        }
+        if (IsKeyPressed(KEY_N)) {
+            netToggle = !netToggle;
         }
 
         if (editMap)
@@ -130,16 +139,21 @@ int main()
             drawMap();
             drawBottomBar();
 
+            if (netToggle) drawNet();
+
             if (editMap)
             {
                 Rectangle rec = {
-                mouseCellX * CELL_SIZE,
-                mouseCellY * CELL_SIZE,
+                mouseCellX * FCELL_SIZE,
+                mouseCellY * FCELL_SIZE,
                 FCELL_SIZE, FCELL_SIZE
                 };
 
                 DrawRectangleLinesEx(rec, 2, GREEN);
             }
+
+
+            DrawFPS(0, 0);
 
         EndDrawing();
     }

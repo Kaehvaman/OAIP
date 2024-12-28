@@ -538,7 +538,7 @@ int main()
 	//SetTextureFilter(Arial.texture, TEXTURE_FILTER_BILINEAR);
 
 	RenderTexture2D canvas = LoadRenderTexture(screenWidth, screenHeight);
-	//SetTextureFilter(canvas.texture, TEXTURE_FILTER_BILINEAR);
+	SetTextureFilter(canvas.texture, TEXTURE_FILTER_BILINEAR);
 	SetTextureWrap(canvas.texture, TEXTURE_WRAP_CLAMP);
 
 	RenderTexture2D canvasBlurX = LoadRenderTexture(screenWidth, screenHeight);
@@ -558,7 +558,7 @@ int main()
 	int watershaderResolutionLoc = GetShaderLocation(watershader, "resolution");
 	SetShaderValue(watershader, watershaderResolutionLoc, &resolution, SHADER_UNIFORM_VEC2);
 
-	Texture waterBump = LoadTexture("waterbump_blur.png");
+	Texture waterBump = LoadTexture("waterbump_denoise_blur1.png");
 	SetTextureFilter(waterBump, TEXTURE_FILTER_BILINEAR);
 
 	Shader blur13 = LoadShader(0, "blur13.frag");
@@ -567,13 +567,13 @@ int main()
 	SetShaderValue(blur13, blur13resolution, &resolution, SHADER_UNIFORM_VEC2);
 
 	GuiSetFont(InconsolataBold);
-	GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
+	GuiSetStyle(DEFAULT, TEXT_SIZE, (int)(24 * scaleDPI.x));
 	GuiSetStyle(DEFAULT, TEXT_SPACING, 0);
-	GuiSetStyle(DEFAULT, TEXT_LINE_SPACING, 24);
+	GuiSetStyle(DEFAULT, TEXT_LINE_SPACING, (int)(24 * scaleDPI.x));
 	GuiSetStyle(STATUSBAR, BORDER_WIDTH, 2);
 
 	// Create the Nuklear Context
-	struct nk_context* ctx = InitNuklearEx(InconsolataBold, 24);
+	struct nk_context* ctx = InitNuklearEx(InconsolataBold, 24 * scaleDPI.x);
 	
 	Vector2 mousePos = { 0 };
 	int mouseCellX = 0;
@@ -663,7 +663,7 @@ int main()
 		{
 			//ClearBackground((Color) { 255, 255, 255, 0 });
 			//ClearBackground(BLANK);
-			Rectangle roundRect = { 100, 260, 185, 36 };
+			Rectangle roundRect = { 100 * scaleDPI.x, 260 * scaleDPI.y, 185 * scaleDPI.x, 36 * scaleDPI.y };
 			DrawRectangleRounded(roundRect, 0.5f, 6, BLACK);
 			DrawRectangleRoundedLines(roundRect, 0.5f, 6, ORANGE);
 		}
@@ -674,12 +674,12 @@ int main()
 		SetShaderValue(watershader, watershaderSecondsLoc, &timeF, SHADER_UNIFORM_FLOAT);
 
 		Rectangle rec = { 0, 0, (float)canvas.texture.width, (float)(-canvas.texture.height) };
-		//BeginShaderMode(watershader);
+		BeginShaderMode(watershader);
 		{
 			SetShaderValueTexture(watershader, waterBumpMapLoc, waterBump);
 			DrawTextureRec(canvas.texture, rec, (Vector2) { 0.0f, 0.0f }, WHITE);
 		}
-		//EndShaderMode();
+		EndShaderMode();
 		
 		//BeginTextureMode(canvasBlurX);
 		//{

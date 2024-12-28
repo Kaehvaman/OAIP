@@ -11,7 +11,7 @@ uniform sampler2D waterBumpMap;
 uniform float seconds;
 uniform vec2 resolution;
 
-const float blurScale = 0.5;
+const float blurScale = 0.3;
 const float waveWidth = 0.1;
 const float waveHeight = 0.1;
 

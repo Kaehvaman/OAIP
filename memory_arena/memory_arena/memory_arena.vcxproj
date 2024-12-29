@@ -127,7 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\main.c" />
+    <ClCompile Include="..\src\test.c" />
     <ClCompile Include="..\src\memory_arena.c" />
   </ItemGroup>
   <ItemGroup>

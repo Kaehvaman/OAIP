@@ -18,3 +18,4 @@ typedef struct {
 Arena ArenaInit(size_t buffer_size);
 void* ArenaAlloc(Arena* arena, size_t size);
 void* ArenaAllocAligned(Arena* arena, size_t size, size_t alignment);
+void ArenaDestroy(Arena* arena);

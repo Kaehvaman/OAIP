@@ -60,5 +60,16 @@ void* ArenaAlloc(Arena* arena, size_t size)
 Arena ArenaInit(size_t buffer_size)
 {
 	void* buffer = SafeMalloc(buffer_size);
-	return (Arena) { buffer, buffer_size, (uintptr_t)buffer };
+	return (Arena) {
+		.buffer = buffer, 
+		.size = buffer_size, 
+		.offset_ptr = (uintptr_t)buffer
+	};
+}
+
+void ArenaDestroy(Arena* arena)
+{
+	free(arena->buffer);
+	arena->offset_ptr = NULL;
+	arena->size = 0;
 }

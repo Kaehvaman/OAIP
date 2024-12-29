@@ -17,7 +17,7 @@
 #define RAYLIB_NUKLEAR_IMPLEMENTATION
 #define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
 //#define RAYLIB_NUKLEAR_DEFAULT_ARC_SEGMENTS 1
-#pragma warning(disable: 4116)
+//#pragma warning(disable: 4116)
 #include "raylib-nuklear.h"
 
 Vector2 scaleDPI = { 1.0f, 1.0f };
@@ -281,6 +281,7 @@ void load() {
 			"Ошибка загрузки",
 			MB_ICONERROR
 		);*/
+
 		tinyfd_messageBox(
 			u8"Ошибка сохранения",
 			u8"Невозможно создать файл\nПроверьте целостность сохранения",
@@ -566,6 +567,11 @@ int main()
 	int blur13direction = GetShaderLocation(blur13, "direction");
 	SetShaderValue(blur13, blur13resolution, &resolution, SHADER_UNIFORM_VEC2);
 
+	Image baroImage = LoadImage("screenshot1.jpg");
+	ImageResize(&baroImage, screenWidth, screenHeight);
+	Texture baroTextrue = LoadTextureFromImage(baroImage);
+	SetTextureFilter(baroTextrue, TEXTURE_FILTER_BILINEAR);
+
 	GuiSetFont(InconsolataBold);
 	GuiSetStyle(DEFAULT, TEXT_SIZE, (int)(24 * scaleDPI.x));
 	GuiSetStyle(DEFAULT, TEXT_SPACING, 0);
@@ -674,10 +680,12 @@ int main()
 		SetShaderValue(watershader, watershaderSecondsLoc, &timeF, SHADER_UNIFORM_FLOAT);
 
 		Rectangle rec = { 0, 0, (float)canvas.texture.width, (float)(-canvas.texture.height) };
+		Rectangle rec1 = { 0, 0, screenWidthF, screenHeightF };
 		BeginShaderMode(watershader);
 		{
 			SetShaderValueTexture(watershader, waterBumpMapLoc, waterBump);
 			DrawTextureRec(canvas.texture, rec, (Vector2) { 0.0f, 0.0f }, WHITE);
+			//DrawTextureRec(baroTextrue, rec1, (Vector2) { 0.0f, 0.0f }, WHITE);
 		}
 		EndShaderMode();
 		
@@ -732,10 +740,15 @@ int main()
 	//UnloadFont(InconsolataBold);
 
 	UnloadRenderTexture(canvas);
+	UnloadRenderTexture(canvasBlurX);
 
 	UnloadShader(blur);
+	UnloadShader(blur13);
 	UnloadShader(watershader);
 	UnloadTexture(waterBump);
+
+	UnloadImage(baroImage);
+	UnloadTexture(baroTextrue);
 	
 	// De-initialize the Nuklear GUI
 	UnloadNuklear(ctx);

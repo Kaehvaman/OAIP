@@ -1,13 +1,19 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "raylib.h"
 #include "raymath.h"
+#include "resource_dir.h"
 #include <stdbool.h>
 #include <iso646.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define MAP_X 100
-#define MAP_Y 50
-#define CELL_SIZE 20
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
+
+#define MAP_X 200
+#define MAP_Y 100
+#define CELL_SIZE 12
 #define FCELL_SIZE (float)CELL_SIZE
 
 #define BOTTOM_BAR_HEIGHT 60
@@ -17,8 +23,31 @@
 #define VSGREEN CLITERAL(Color){78, 201, 176, 255}
 #define WATERBLUE CLITERAL(Color){200, 240, 255, 255}
 
-static bool map[MAP_X][MAP_Y] = { 0 };
-static bool tempMap[MAP_X][MAP_Y] = { 0 };
+//static bool map[MAP_X][MAP_Y] = { 0 };
+//static bool tempMap[MAP_X][MAP_Y] = { 0 };
+
+bool** map;
+bool** tempMap;
+
+void* SafeMalloc(size_t size)
+{
+    void* buffer = malloc(size);
+    if (buffer == NULL) {
+        fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", size);
+        abort();
+    }
+    return buffer;
+}
+
+void* SafeCalloc(size_t count, size_t size)
+{
+    void* buffer = calloc(count, size);
+    if (buffer == NULL) {
+        fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", count * size);
+        abort();
+    }
+    return buffer;
+}
 
 static inline int checkCell(int x, int y) {
     if (x < 0 or y < 0 or x > MAP_X - 1 or y > MAP_Y - 1) {
@@ -56,7 +85,15 @@ void celluralAutomata()
 
         }
     }
-    memcpy(map, tempMap, MAP_X * MAP_Y * sizeof(bool));
+    for (int x = 0; x < MAP_X; x++) {
+        memcpy(map[x], tempMap[x], MAP_Y * sizeof(bool));
+    }
+}
+
+void ClearMap() {
+    for (int x = 0; x < MAP_X; x++) {
+        memset(map[x], 0, MAP_Y * sizeof(bool));
+    }
 }
 
 void drawMap()
@@ -89,16 +126,40 @@ void drawBottomBar()
     DrawRectangle(0, MAP_Y * CELL_SIZE, MAP_X * CELL_SIZE, BOTTOM_BAR_HEIGHT, BLACKGRAY);
 }
 
+#define CPSIZE 213
 int main()
 {
+    map = (bool**)SafeMalloc(MAP_X * sizeof(bool*));
+    tempMap = (bool**)SafeMalloc(MAP_X * sizeof(bool*));
+    for (int x = 0; x < MAP_X; x++) {
+        map[x] = (bool*)SafeCalloc(MAP_Y, sizeof(bool));
+        tempMap[x] = (bool*)SafeCalloc(MAP_Y, sizeof(bool));
+    }
+
     const int screenWidth = MAP_X * CELL_SIZE;
     const int screenHeight = MAP_Y * CELL_SIZE + BOTTOM_BAR_HEIGHT;
 
-    SetConfigFlags(FLAG_VSYNC_HINT);
-
     InitWindow(screenWidth, screenHeight, "Game of Life");
 
-    //SetTargetFPS(60);
+    SearchAndSetResourceDir("resources");
+
+    int codepoints[CPSIZE] = { 0 };
+    for (int i = 0; i < 127 - 32; i++) codepoints[i] = 32 + i;   // Basic ASCII characters
+    for (int i = 0; i < 118; i++) codepoints[95 + i] = 1024 + i;   // Cyrillic characters
+
+    Font InconsolataBold = LoadFontEx("Inconsolata-LGC-Bold.ttf", 36, codepoints, CPSIZE);
+    SetTextureFilter(InconsolataBold.texture, TEXTURE_FILTER_BILINEAR);
+
+    GuiSetFont(InconsolataBold);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, (int)(24));
+    GuiSetStyle(DEFAULT, TEXT_SPACING, 0);
+    GuiSetStyle(DEFAULT, TEXT_LINE_SPACING, (int)(24));
+    GuiSetStyle(STATUSBAR, BORDER_WIDTH, 2);
+
+    int monitor = GetCurrentMonitor();
+    int monitorFPS = GetMonitorRefreshRate(monitor);
+
+    SetTargetFPS(monitorFPS);
 
     Vector2 mousePos = { 0 };
     int mouseCellX = 0;
@@ -107,13 +168,29 @@ int main()
     bool editMap = true;
     bool netToggle = false;
 
+    float simSpeed = 1.0f;
+    int frameCounter = 0;
+
+    int guyScreenWidth = 720;
+
     while (!WindowShouldClose())
     {
+        frameCounter++;
+
         if (IsKeyPressed(KEY_SPACE)) {
             editMap = !editMap;
         }
         if (IsKeyPressed(KEY_N)) {
             netToggle = !netToggle;
+        }
+        if (IsKeyPressed(KEY_EQUAL)) {
+            simSpeed *= 2.0f;
+        }
+        if (IsKeyPressed(KEY_MINUS)) {
+            simSpeed *= 0.5f;
+        }
+        if (IsKeyPressed(KEY_C)) {
+            ClearMap();
         }
 
         if (editMap)
@@ -129,12 +206,23 @@ int main()
                 map[mouseCellX][mouseCellY] = false;
             }
         }
-        else {
+        else if (FloatEquals(simSpeed, 1.0f)) {
             celluralAutomata();
+        }
+        else if (simSpeed < 1.0f and frameCounter >= 1 / simSpeed) {
+            celluralAutomata();
+            //printf("%d %d\n", frameCounter, (int)(1 / simSpeed));
+            frameCounter = 0;
+        }
+        else if (simSpeed > 1.0f) {
+            for (int i = 0; i < (int)simSpeed; i++) {
+                celluralAutomata();
+            }
+            //printf("%f speed\n", simSpeed);
         }
 
         BeginDrawing();
-            ClearBackground(RAYWHITE);
+            ClearBackground(WHITE);
 
             drawMap();
             drawBottomBar();
@@ -143,20 +231,28 @@ int main()
 
             if (editMap)
             {
-                Rectangle rec = {
-                mouseCellX * FCELL_SIZE,
-                mouseCellY * FCELL_SIZE,
-                FCELL_SIZE, FCELL_SIZE
-                };
-
+                Rectangle rec = { mouseCellX * FCELL_SIZE, mouseCellY * FCELL_SIZE, FCELL_SIZE, FCELL_SIZE };
                 DrawRectangleLinesEx(rec, 2, GREEN);
             }
 
+            //Rectangle settingsBox = { 400, 400, 400, 200 };
+            //GuiGroupBox(settingsBox, u8"Init game");
+            //Rectangle valueBox1 = { 620, 420, 100, 40 };
+            //GuiValueBox(valueBox1, u8"screen Width ", &guyScreenWidth, 120, 2560, true);
 
-            DrawFPS(0, 0);
+            DrawFPS(0, MAP_Y * CELL_SIZE);
+            DrawText(TextFormat("%.4fx", simSpeed), 0, MAP_Y * CELL_SIZE + 20, 20, ORANGE);
+            DrawText(TextFormat("%.1f TPS", monitorFPS * simSpeed), 0, MAP_Y * CELL_SIZE + 40, 20, BLUE);
 
         EndDrawing();
     }
+
+    /*for (int x = 0; x < MAP_X; x++) {
+        free(map[x]);
+    }
+    free(map);*/
+
+    UnloadFont(InconsolataBold);
 
     CloseWindow();
 

@@ -24,12 +24,24 @@
     <ClInclude Include="..\include\raymath.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\raygui.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\resource_dir.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\game.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="..\src\tinyfiledialogs.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\game.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

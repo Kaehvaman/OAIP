@@ -17,23 +17,29 @@
 #define RAYLIB_NUKLEAR_IMPLEMENTATION
 #define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
 //#define RAYLIB_NUKLEAR_DEFAULT_ARC_SEGMENTS 1
-//#pragma warning(disable: 4116)
+#pragma warning(disable: 4116)
 #include "raylib-nuklear.h"
 
 Vector2 scaleDPI = { 1.0f, 1.0f };
 #define M 10
 #define N 15
-#define HEIGHT (int)(50 * scaleDPI.y)
-#define WIDTH (int)(50 * scaleDPI.x)
-#define VOFFSET (int)(52 * scaleDPI.y)
+//#define WIDTH (int)(50 * scaleDPI.x)
+//#define HEIGHT (int)(50 * scaleDPI.y)
+//#define VOFFSET (int)(52 * scaleDPI.y)
 
-#define FWIDTH (float)WIDTH
-#define FHEIGHT (float)HEIGHT
+//#define FWIDTH (float)WIDTH
+//#define FHEIGHT (float)HEIGHT
 
 #define PUREBLUE (Color) { 0, 0, 255, 255 }
 #define BLACKGRAY (Color) {30, 30, 30, 255}
 #define VSGREEN (Color) {78, 201, 176, 255}
 #define WATERBLUE CLITERAL(Color){200, 240, 255, 255}
+
+int HEIGHT = 50;
+int WIDTH = 50;
+int VOFFSET = 52;
+float FWIDTH;
+float FHEIGHT;
 
 // Коды ячеек:
 // 0 - свободна
@@ -503,14 +509,20 @@ void callNKErrorBoxes(struct nk_context* ctx) {
 #define CPSIZE 213
 int main()
 {
-	//SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 	
-	InitWindow( 1280,  720, "lab16 with raylib");
-	scaleDPI = GetWindowScaleDPI();
+	InitWindow(N * WIDTH, M * HEIGHT + VOFFSET, "lab16 with raylib");
 
 	int monitor = GetCurrentMonitor();
 	int monitorCenterX = GetMonitorWidth(monitor) / 2;
 	int monitorCenterY = GetMonitorHeight(monitor) / 2;
+
+	scaleDPI = GetWindowScaleDPI();
+	WIDTH = (int)(WIDTH * scaleDPI.x);
+	HEIGHT = (int)(HEIGHT * scaleDPI.y);
+	VOFFSET = (int)(VOFFSET * scaleDPI.y);
+	FWIDTH = (float)WIDTH;
+	FHEIGHT = (float)HEIGHT;
 
 	int screenWidth = N * WIDTH;
 	int screenHeight = M * HEIGHT + VOFFSET;

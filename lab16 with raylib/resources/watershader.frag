@@ -33,7 +33,7 @@ vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction)
 
 void main()
 {
-	vec4 bumpColor = texture(waterBumpMap, fragTexCoord + sin(seconds / 2.0) / 20.0);
+	vec4 bumpColor = texture(waterBumpMap, fragTexCoord/5 + sin(seconds / 2.0) / 20.0);
 	bumpColor = (bumpColor + texture(waterBumpMap, fragTexCoord*1.5 + cos(seconds / 2.0) / 20.0)) * 0.5;
 
 	vec2 samplePos = fragTexCoord;

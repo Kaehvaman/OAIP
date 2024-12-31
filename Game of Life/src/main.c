@@ -8,12 +8,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "parallel_for.h"
+
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-#define MAP_X 200
-#define MAP_Y 100
-#define CELL_SIZE 12
+#define MAP_X 400
+#define MAP_Y 200
+#define CELL_SIZE 6
 #define FCELL_SIZE (float)CELL_SIZE
 
 #define BOTTOM_BAR_HEIGHT 60
@@ -33,7 +35,7 @@ void* SafeMalloc(size_t size)
 {
     void* buffer = malloc(size);
     if (buffer == NULL) {
-        fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", size);
+        fprintf(stderr, "Error in SafeMalloc: failed to allocate %zu bytes.\n", size);
         abort();
     }
     return buffer;
@@ -43,7 +45,7 @@ void* SafeCalloc(size_t count, size_t size)
 {
     void* buffer = calloc(count, size);
     if (buffer == NULL) {
-        fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", count * size);
+        fprintf(stderr, "Error in SafeCalloc: failed to allocate %zu bytes.\n", count * size);
         abort();
     }
     return buffer;
@@ -89,6 +91,37 @@ void celluralAutomata()
         memcpy(map[x], tempMap[x], MAP_Y * sizeof(bool));
     }
 }
+
+//int compute_cell(int x) {
+//    int neighbours = 0;
+//
+//    neighbours += checkCell(x - 1, y);
+//    neighbours += checkCell(x - 1, y + 1);
+//    neighbours += checkCell(x - 1, y - 1);
+//    neighbours += checkCell(x + 1, y);
+//    neighbours += checkCell(x + 1, y + 1);
+//    neighbours += checkCell(x + 1, y - 1);
+//    neighbours += checkCell(x, y + 1);
+//    neighbours += checkCell(x, y - 1);
+//
+//    if (neighbours == 3) {
+//        tempMap[x][y] = true;
+//    }
+//    else if (neighbours == 2) {
+//        tempMap[x][y] = map[x][y];
+//    }
+//    else {
+//        tempMap[x][y] = false;
+//    }
+//}
+//
+//void* compute_cell_forp(void* arg)
+//{
+//    int* pa = (int*)arg;
+//    int* result = malloc(sizeof(*result));
+//    *result = mult2(*pa);
+//    return result;
+//}
 
 void ClearMap() {
     for (int x = 0; x < MAP_X; x++) {
@@ -242,19 +275,25 @@ int main()
 
             DrawFPS(0, MAP_Y * CELL_SIZE);
             DrawText(TextFormat("%.4fx", simSpeed), 0, MAP_Y * CELL_SIZE + 20, 20, ORANGE);
-            DrawText(TextFormat("%.1f TPS", monitorFPS * simSpeed), 0, MAP_Y * CELL_SIZE + 40, 20, BLUE);
+            DrawText(TextFormat("%.1f TPS", GetFPS() * simSpeed), 0, MAP_Y * CELL_SIZE + 40, 20, BLUE);
 
         EndDrawing();
     }
 
-    /*for (int x = 0; x < MAP_X; x++) {
+    for (int x = 0; x < MAP_X; x++) {
         free(map[x]);
+        free(tempMap[x]);
     }
-    free(map);*/
+    free(map);
+    free(tempMap);
 
     UnloadFont(InconsolataBold);
 
     CloseWindow();
 
     return 0;
+}
+
+int WinMain() {
+    return main();
 }

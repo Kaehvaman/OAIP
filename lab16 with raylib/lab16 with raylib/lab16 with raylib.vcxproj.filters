@@ -65,14 +65,8 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\resources\blur.frag">
-      <Filter>Файлы ресурсов</Filter>
-    </None>
-    <None Include="..\resources\blur13.frag">
-      <Filter>Файлы ресурсов</Filter>
-    </None>
     <None Include="..\resources\watershader.frag">
-      <Filter>Файлы ресурсов</Filter>
+      <Filter>Исходные файлы</Filter>
     </None>
   </ItemGroup>
 </Project>

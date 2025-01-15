@@ -3,21 +3,20 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "resource_dir.h"
+
 #include <stdbool.h>
 #include <iso646.h>
 #include <stdlib.h>
 #include <string.h>
+#include <threads.h>
 
-#include "parallel_for.h"
+#include "dynamic_memory.h"
+#include "memory_arena.h"
 
-#define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
-
-#define MAP_X 400
-#define MAP_Y 200
-#define CELL_SIZE 6
+#define MAP_X 1200
+#define MAP_Y 600
+#define CELL_SIZE 2
 #define FCELL_SIZE (float)CELL_SIZE
-
 #define BOTTOM_BAR_HEIGHT 60
 
 #define PUREBLUE CLITERAL(Color){ 0, 0, 255, 255 }
@@ -25,275 +24,379 @@
 #define VSGREEN CLITERAL(Color){78, 201, 176, 255}
 #define WATERBLUE CLITERAL(Color){200, 240, 255, 255}
 
-//static bool map[MAP_X][MAP_Y] = { 0 };
-//static bool tempMap[MAP_X][MAP_Y] = { 0 };
-
 bool** map;
 bool** tempMap;
 
-void* SafeMalloc(size_t size)
+typedef struct {
+	bool** map;
+	bool** tempMap;
+	int startX;
+	int endX;
+	int startY;
+	int endY;
+} golArgs;
+
+thrd_t threads[32];
+golArgs thread_args[32];
+int numThreads = 5;
+
+static inline int checkCell(int x, int y)
 {
-    void* buffer = malloc(size);
-    if (buffer == NULL) {
-        fprintf(stderr, "Error in SafeMalloc: failed to allocate %zu bytes.\n", size);
-        abort();
-    }
-    return buffer;
+	if (x < 0 or y < 0 or x > MAP_X - 1 or y > MAP_Y - 1) {
+		return 0;
+	}
+	else {
+		return map[x][y];
+	}
 }
 
-void* SafeCalloc(size_t count, size_t size)
+static inline single_gol(int x, int y)
 {
-    void* buffer = calloc(count, size);
-    if (buffer == NULL) {
-        fprintf(stderr, "Error in SafeCalloc: failed to allocate %zu bytes.\n", count * size);
-        abort();
-    }
-    return buffer;
+	int neighbours = 0;
+
+	neighbours += checkCell(x - 1, y);
+	neighbours += checkCell(x - 1, y + 1);
+	neighbours += checkCell(x - 1, y - 1);
+	neighbours += checkCell(x + 1, y);
+	neighbours += checkCell(x + 1, y + 1);
+	neighbours += checkCell(x + 1, y - 1);
+	neighbours += checkCell(x, y + 1);
+	neighbours += checkCell(x, y - 1);
+
+	if (neighbours == 2) {
+		tempMap[x][y] = map[x][y];
+	}
+	else if (neighbours == 3) {
+		tempMap[x][y] = true;
+	}
+	else {
+		tempMap[x][y] = false;
+	}
 }
 
-static inline int checkCell(int x, int y) {
-    if (x < 0 or y < 0 or x > MAP_X - 1 or y > MAP_Y - 1) {
-        return 0;
-    }
-    else {
-        return map[x][y];
-    }
+int gol_thread(void* arg_ptr)
+{
+	golArgs args = *(golArgs*)(arg_ptr);
+
+	for (int x = args.startX; x < args.endX; x++) {
+		for (int y = args.startY; y < args.endY; y++) {
+			int neighbours = 0;
+
+			neighbours += checkCell(x - 1, y);
+			neighbours += checkCell(x - 1, y + 1);
+			neighbours += checkCell(x - 1, y - 1);
+			neighbours += checkCell(x + 1, y);
+			neighbours += checkCell(x + 1, y + 1);
+			neighbours += checkCell(x + 1, y - 1);
+			neighbours += checkCell(x, y + 1);
+			neighbours += checkCell(x, y - 1);
+
+			if (neighbours == 2) {
+				tempMap[x][y] = map[x][y];
+			}
+			else if (neighbours == 3) {
+				tempMap[x][y] = true;
+			}
+			else {
+				tempMap[x][y] = false;
+			}
+
+		}
+	}
+
+	single_gol(args.startX, args.startY);
+	single_gol(args.startX, args.endY);
+	single_gol(args.endX, args.startY);
+	single_gol(args.endX, args.endY);
+
+	return 0;
+}
+
+void gol_thread_init() {
+	int deltaX = MAP_X / numThreads;
+	int remainder = MAP_X % numThreads;
+
+	for (int i = 0; i < numThreads - 1; i++) {
+		thread_args[i] = (golArgs){
+			.startX = deltaX * i,
+			.endX = deltaX * (i + 1),
+			.startY = 0,
+			.endY = MAP_Y
+		};
+	}
+	thread_args[numThreads - 1] = (golArgs){
+		.startX = deltaX * (numThreads - 1),
+		.endX = MAP_X,
+		.startY = 0,
+		.endY = MAP_Y
+	};
+}
+
+void gol_thread_start()
+{
+	for (int i = 0; i < numThreads; i++) {
+		thrd_create(&threads[i], gol_thread, &thread_args[i]);
+	}
+	for (int i = 0; i < numThreads; i++) {
+		thrd_join(threads[i], NULL);
+	}
+	for (int x = 0; x < MAP_X; x++) {
+		memcpy(map[x], tempMap[x], MAP_Y * sizeof(bool));
+	}
 }
 
 void celluralAutomata()
 {
-    for (int x = 0; x < MAP_X; x++) {
-        for (int y = 0; y < MAP_Y; y++) {
-            int neighbours = 0;
+	for (int x = 0; x < MAP_X; x++) {
+		for (int y = 0; y < MAP_Y; y++) {
+			int neighbours = 0;
 
-            neighbours += checkCell(x - 1, y);
-            neighbours += checkCell(x - 1, y + 1);
-            neighbours += checkCell(x - 1, y - 1);
-            neighbours += checkCell(x + 1, y);
-            neighbours += checkCell(x + 1, y + 1);
-            neighbours += checkCell(x + 1, y - 1);
-            neighbours += checkCell(x, y + 1);
-            neighbours += checkCell(x, y - 1);
+			neighbours += checkCell(x - 1, y);
+			neighbours += checkCell(x - 1, y + 1);
+			neighbours += checkCell(x - 1, y - 1);
+			neighbours += checkCell(x + 1, y);
+			neighbours += checkCell(x + 1, y + 1);
+			neighbours += checkCell(x + 1, y - 1);
+			neighbours += checkCell(x, y + 1);
+			neighbours += checkCell(x, y - 1);
 
-            if (neighbours == 3) {
-                tempMap[x][y] = true;
-            }
-            else if (neighbours == 2) {
-                tempMap[x][y] = map[x][y];
-            }
-            else {
-                tempMap[x][y] = false;
-            }
+			if (neighbours == 3) {
+				tempMap[x][y] = true;
+			}
+			else if (neighbours == 2) {
+				tempMap[x][y] = map[x][y];
+			}
+			else {
+				tempMap[x][y] = false;
+			}
 
-        }
-    }
-    for (int x = 0; x < MAP_X; x++) {
-        memcpy(map[x], tempMap[x], MAP_Y * sizeof(bool));
-    }
+		}
+	}
+	for (int x = 0; x < MAP_X; x++) {
+		memcpy(map[x], tempMap[x], MAP_Y * sizeof(bool));
+	}
 }
 
-//int compute_cell(int x) {
-//    int neighbours = 0;
-//
-//    neighbours += checkCell(x - 1, y);
-//    neighbours += checkCell(x - 1, y + 1);
-//    neighbours += checkCell(x - 1, y - 1);
-//    neighbours += checkCell(x + 1, y);
-//    neighbours += checkCell(x + 1, y + 1);
-//    neighbours += checkCell(x + 1, y - 1);
-//    neighbours += checkCell(x, y + 1);
-//    neighbours += checkCell(x, y - 1);
-//
-//    if (neighbours == 3) {
-//        tempMap[x][y] = true;
-//    }
-//    else if (neighbours == 2) {
-//        tempMap[x][y] = map[x][y];
-//    }
-//    else {
-//        tempMap[x][y] = false;
-//    }
-//}
-//
-//void* compute_cell_forp(void* arg)
-//{
-//    int* pa = (int*)arg;
-//    int* result = malloc(sizeof(*result));
-//    *result = mult2(*pa);
-//    return result;
-//}
-
 void ClearMap() {
-    for (int x = 0; x < MAP_X; x++) {
-        memset(map[x], 0, MAP_Y * sizeof(bool));
-    }
+	for (int x = 0; x < MAP_X; x++) {
+		memset(map[x], 0, MAP_Y * sizeof(bool));
+	}
 }
 
 void drawMap()
 {
-    for (int x = 0; x < MAP_X; x++) {
-        for (int y = 0; y < MAP_Y; y++) {
-            if (map[x][y]) {
-                int posX = x * CELL_SIZE;
-                int posY = y * CELL_SIZE;
-                DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, BLACK);
-            }
-        }
-    }
+	for (int x = 0; x < MAP_X; x++) {
+		for (int y = 0; y < MAP_Y; y++) {
+			if (map[x][y]) {
+				int posX = x * CELL_SIZE;
+				int posY = y * CELL_SIZE;
+				DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, BLACK);
+			}
+		}
+	}
 }
 
 void drawNet() {
-    for (int i = 0; i <= MAP_X * CELL_SIZE; i += CELL_SIZE) {
-        DrawLine(i, 0, i, MAP_Y * CELL_SIZE, GRAY);
-        DrawLine(i+1, 0, i+1, MAP_Y * CELL_SIZE, GRAY);
-    }
+	for (int i = 0; i <= MAP_X * CELL_SIZE; i += CELL_SIZE) {
+		DrawLine(i, 0, i, MAP_Y * CELL_SIZE, GRAY);
+		DrawLine(i+1, 0, i+1, MAP_Y * CELL_SIZE, GRAY);
+	}
 
-    for (int i = 0; i <= MAP_Y * CELL_SIZE; i += CELL_SIZE) {
-        DrawLine(0, i, MAP_X * CELL_SIZE, i, GRAY);
-        DrawLine(0, i-1, MAP_X * CELL_SIZE, i-1, GRAY);
-    }
+	for (int i = 0; i <= MAP_Y * CELL_SIZE; i += CELL_SIZE) {
+		DrawLine(0, i, MAP_X * CELL_SIZE, i, GRAY);
+		DrawLine(0, i-1, MAP_X * CELL_SIZE, i-1, GRAY);
+	}
 }
 
 void drawBottomBar()
 {
-    DrawRectangle(0, MAP_Y * CELL_SIZE, MAP_X * CELL_SIZE, BOTTOM_BAR_HEIGHT, BLACKGRAY);
+	DrawRectangle(0, MAP_Y * CELL_SIZE, MAP_X * CELL_SIZE, BOTTOM_BAR_HEIGHT, BLACKGRAY);
 }
 
 #define CPSIZE 213
 int main()
 {
-    map = (bool**)SafeMalloc(MAP_X * sizeof(bool*));
-    tempMap = (bool**)SafeMalloc(MAP_X * sizeof(bool*));
-    for (int x = 0; x < MAP_X; x++) {
-        map[x] = (bool*)SafeCalloc(MAP_Y, sizeof(bool));
-        tempMap[x] = (bool*)SafeCalloc(MAP_Y, sizeof(bool));
-    }
+	map = (bool**)SafeMalloc(MAP_X * sizeof(bool*));
+	tempMap = (bool**)SafeMalloc(MAP_X * sizeof(bool*));
+	for (int x = 0; x < MAP_X; x++) {
+		map[x] = (bool*)SafeCalloc(MAP_Y, sizeof(bool));
+		tempMap[x] = (bool*)SafeCalloc(MAP_Y, sizeof(bool));
+	}
 
-    const int screenWidth = MAP_X * CELL_SIZE;
-    const int screenHeight = MAP_Y * CELL_SIZE + BOTTOM_BAR_HEIGHT;
+	gol_thread_init();
 
-    InitWindow(screenWidth, screenHeight, "Game of Life");
+	/*Arena arena = ArenaCreate(SafeCalloc(1024 * 1024, 1), 1024 * 1024);
+	map = (bool**)ArenaAlloc(&arena, MAP_X * sizeof(bool*));
+	tempMap = (bool**)ArenaAlloc(&arena, MAP_X * sizeof(bool*));
+	for (int x = 0; x < MAP_X; x++) {
+		map[x] = (bool*)ArenaAlloc(&arena, MAP_Y * sizeof(bool));
+		tempMap[x] = (bool*)ArenaAlloc(&arena, MAP_Y * sizeof(bool));
+	}*/
 
-    SearchAndSetResourceDir("resources");
+	const int screenWidth = MAP_X * CELL_SIZE;
+	const int screenHeight = MAP_Y * CELL_SIZE + BOTTOM_BAR_HEIGHT;
 
-    int codepoints[CPSIZE] = { 0 };
-    for (int i = 0; i < 127 - 32; i++) codepoints[i] = 32 + i;   // Basic ASCII characters
-    for (int i = 0; i < 118; i++) codepoints[95 + i] = 1024 + i;   // Cyrillic characters
+	SetConfigFlags(FLAG_VSYNC_HINT);
 
-    Font InconsolataBold = LoadFontEx("Inconsolata-LGC-Bold.ttf", 36, codepoints, CPSIZE);
-    SetTextureFilter(InconsolataBold.texture, TEXTURE_FILTER_BILINEAR);
+	InitWindow(screenWidth, screenHeight, "Game of Life");
 
-    GuiSetFont(InconsolataBold);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, (int)(24));
-    GuiSetStyle(DEFAULT, TEXT_SPACING, 0);
-    GuiSetStyle(DEFAULT, TEXT_LINE_SPACING, (int)(24));
-    GuiSetStyle(STATUSBAR, BORDER_WIDTH, 2);
+	int monitor = GetCurrentMonitor();
+	int monitorFPS = GetMonitorRefreshRate(monitor);
 
-    int monitor = GetCurrentMonitor();
-    int monitorFPS = GetMonitorRefreshRate(monitor);
+	SetTargetFPS(monitorFPS);
 
-    SetTargetFPS(monitorFPS);
+	SearchAndSetResourceDir("resources");
 
-    Vector2 mousePos = { 0 };
-    int mouseCellX = 0;
-    int mouseCellY = 0;
+	int codepoints[CPSIZE] = { 0 };
+	for (int i = 0; i < 127 - 32; i++) codepoints[i] = 32 + i;   // Basic ASCII characters
+	for (int i = 0; i < 118; i++) codepoints[95 + i] = 1024 + i;   // Cyrillic characters
 
-    bool editMap = true;
-    bool netToggle = false;
+	Font InconsolataBold = LoadFontEx("Inconsolata-LGC-Bold.ttf", 36, codepoints, CPSIZE);
+	SetTextureFilter(InconsolataBold.texture, TEXTURE_FILTER_BILINEAR);
 
-    float simSpeed = 1.0f;
-    int frameCounter = 0;
+	Vector2 mousePos = { 0 };
+	Vector2 mouseWorldPos = { 0 };
+	int mouseWorldCellX = 0;
+	int mouseWorldCellY = 0;
 
-    int guyScreenWidth = 720;
+	bool editMap = true;
+	bool netToggle = false;
 
-    while (!WindowShouldClose())
-    {
-        frameCounter++;
+	float simSpeed = 1.0f;
+	int frameCounter = 0;
 
-        if (IsKeyPressed(KEY_SPACE)) {
-            editMap = !editMap;
-        }
-        if (IsKeyPressed(KEY_N)) {
-            netToggle = !netToggle;
-        }
-        if (IsKeyPressed(KEY_EQUAL)) {
-            simSpeed *= 2.0f;
-        }
-        if (IsKeyPressed(KEY_MINUS)) {
-            simSpeed *= 0.5f;
-        }
-        if (IsKeyPressed(KEY_C)) {
-            ClearMap();
-        }
+	int guiScreenWidth = 720;
 
-        if (editMap)
-        {
-            mousePos = GetMousePosition();
-            mouseCellX = (int)(Clamp(mousePos.x, 0, (float)(MAP_X * CELL_SIZE - 1)) / CELL_SIZE);
-            mouseCellY = (int)(Clamp(mousePos.y, 0, (float)(MAP_Y * CELL_SIZE - 1)) / CELL_SIZE);
+	Camera2D camera = {
+		.target = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f },
+		.offset = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f },
+		.rotation = 0.0f,
+		.zoom = 1.0f
+	};
+	int cameraSpeed;
+	float frametime;
+	//float mouseWheel;
 
-            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-                map[mouseCellX][mouseCellY] = true;
-            }
-            else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-                map[mouseCellX][mouseCellY] = false;
-            }
-        }
-        else if (FloatEquals(simSpeed, 1.0f)) {
-            celluralAutomata();
-        }
-        else if (simSpeed < 1.0f and frameCounter >= 1 / simSpeed) {
-            celluralAutomata();
-            //printf("%d %d\n", frameCounter, (int)(1 / simSpeed));
-            frameCounter = 0;
-        }
-        else if (simSpeed > 1.0f) {
-            for (int i = 0; i < (int)simSpeed; i++) {
-                celluralAutomata();
-            }
-            //printf("%f speed\n", simSpeed);
-        }
+	while (!WindowShouldClose())
+	{
+		frameCounter++;
+		frametime = GetFrameTime();
 
-        BeginDrawing();
-            ClearBackground(WHITE);
+		if (IsKeyPressed(KEY_SPACE)) {
+			editMap = !editMap;
+		}
+		if (IsKeyPressed(KEY_N)) {
+			netToggle = !netToggle;
+		}
+		if (IsKeyPressed(KEY_EQUAL)) {
+			simSpeed *= 2.0f;
+		}
+		if (IsKeyPressed(KEY_MINUS)) {
+			simSpeed *= 0.5f;
+		}
+		if (IsKeyPressed(KEY_C)) {
+			ClearMap();
+		}
 
-            drawMap();
-            drawBottomBar();
+		if (editMap)
+		{
+			mousePos = GetMousePosition();
+			mouseWorldPos = GetScreenToWorld2D(mousePos, camera);
+			mouseWorldCellX = (int)(Clamp(mouseWorldPos.x, 0, (float)(MAP_X * CELL_SIZE - 1)) / CELL_SIZE);
+			mouseWorldCellY = (int)(Clamp(mouseWorldPos.y, 0, (float)(MAP_Y * CELL_SIZE - 1)) / CELL_SIZE);
 
-            if (netToggle) drawNet();
+			if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+				map[mouseWorldCellX][mouseWorldCellY] = true;
+			}
+			else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+				map[mouseWorldCellX][mouseWorldCellY] = false;
+			}
+		}
+		else if (FloatEquals(simSpeed, 1.0f)) {
+			//celluralAutomata();
+			gol_thread_start();
+		}
+		else if (simSpeed < 1.0f and frameCounter >= 1 / simSpeed) {
+			//celluralAutomata();
+			gol_thread_start();
+			frameCounter = 0;
+		}
+		else if (simSpeed > 1.0f) {
+			for (int i = 0; i < (int)simSpeed; i++) {
+				//celluralAutomata();
+				gol_thread_start();
+			}
+			//printf("%f speed\n", simSpeed);
+		}
 
-            if (editMap)
-            {
-                Rectangle rec = { mouseCellX * FCELL_SIZE, mouseCellY * FCELL_SIZE, FCELL_SIZE, FCELL_SIZE };
-                DrawRectangleLinesEx(rec, 2, GREEN);
-            }
 
-            //Rectangle settingsBox = { 400, 400, 400, 200 };
-            //GuiGroupBox(settingsBox, u8"Init game");
-            //Rectangle valueBox1 = { 620, 420, 100, 40 };
-            //GuiValueBox(valueBox1, u8"screen Width ", &guyScreenWidth, 120, 2560, true);
 
-            DrawFPS(0, MAP_Y * CELL_SIZE);
-            DrawText(TextFormat("%.4fx", simSpeed), 0, MAP_Y * CELL_SIZE + 20, 20, ORANGE);
-            DrawText(TextFormat("%.1f TPS", GetFPS() * simSpeed), 0, MAP_Y * CELL_SIZE + 40, 20, BLUE);
+		if (IsKeyDown(KEY_LEFT_SHIFT)) {
+			cameraSpeed = 1000;
+		}
+		else {
+			cameraSpeed = 200;
+		}
 
-        EndDrawing();
-    }
+		if (IsKeyDown(KEY_W)) {
+			camera.target.y -= cameraSpeed * frametime;
+		}
+		if (IsKeyDown(KEY_S)) {
+			camera.target.y += cameraSpeed * frametime;
+		}
+		if (IsKeyDown(KEY_A)) {
+			camera.target.x -= cameraSpeed * frametime;
+		}
+		if (IsKeyDown(KEY_D)) {
+			camera.target.x += cameraSpeed * frametime;
+		}
 
-    for (int x = 0; x < MAP_X; x++) {
-        free(map[x]);
-        free(tempMap[x]);
-    }
-    free(map);
-    free(tempMap);
+		BeginDrawing();
 
-    UnloadFont(InconsolataBold);
+			ClearBackground(WHITE);
 
-    CloseWindow();
+			BeginMode2D(camera);
 
-    return 0;
+				drawMap();
+				Rectangle rec = { -2, -2, MAP_X * CELL_SIZE + 4, MAP_Y * CELL_SIZE + 4 };
+
+				DrawRectangleLinesEx(rec, 2.0f, RED);
+
+				if (netToggle) drawNet();
+
+				if (editMap)
+				{
+					Rectangle rec = { mouseWorldCellX * FCELL_SIZE, mouseWorldCellY * FCELL_SIZE, FCELL_SIZE, FCELL_SIZE };
+					DrawRectangleLinesEx(rec, 2, GREEN);
+				}
+
+			EndMode2D();
+
+			drawBottomBar();
+
+			DrawFPS(0, MAP_Y * CELL_SIZE);
+			DrawText(TextFormat("%.4fx", simSpeed), 0, MAP_Y * CELL_SIZE + 20, 20, ORANGE);
+			DrawText(TextFormat("%.1f TPS", GetFPS() * simSpeed), 0, MAP_Y * CELL_SIZE + 40, 20, BLUE);
+
+		EndDrawing();
+	}
+
+	for (int x = 0; x < MAP_X; x++) {
+		free(map[x]);
+		free(tempMap[x]);
+	}
+	free(map);
+	free(tempMap);
+
+	//ArenaDestroy(&arena);
+
+	UnloadFont(InconsolataBold);
+
+	CloseWindow();
+
+	return 0;
 }
 
 int WinMain() {
-    return main();
+	return main();
 }

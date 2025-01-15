@@ -33,7 +33,10 @@
     <ClInclude Include="..\src\game.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\parallel_for.h">
+    <ClInclude Include="..\src\dynamic_memory.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\memory_arena.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,7 +50,13 @@
     <ClCompile Include="..\src\game.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\parallel_for.c">
+    <ClCompile Include="..\src\dynamic_memory.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\memory_arena.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gol_threading.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

@@ -57,7 +57,7 @@ void* ArenaAlloc(Arena* arena, size_t size)
 	return ArenaAllocAligned(arena, size, DEFAULT_ALIGNMENT);
 }
 
-Arena ArenaInit(size_t buffer_size)
+Arena ArenaCreate(size_t buffer_size)
 {
 	void* buffer = SafeMalloc(buffer_size);
 	return (Arena) {

@@ -15,7 +15,7 @@ typedef struct {
 	uintptr_t offset_ptr;
 } Arena;
 
-Arena ArenaInit(size_t buffer_size);
+Arena ArenaCreate(size_t buffer_size);
 void* ArenaAlloc(Arena* arena, size_t size);
 void* ArenaAllocAligned(Arena* arena, size_t size, size_t alignment);
 void ArenaDestroy(Arena* arena);

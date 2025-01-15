@@ -105,6 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\include</AdditionalIncludeDirectories>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,7 +123,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\include;</AdditionalIncludeDirectories>
-      <LanguageStandard_C>Default</LanguageStandard_C>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,13 +140,16 @@
     <ClInclude Include="..\include\raymath.h" />
     <ClInclude Include="..\include\resource_dir.h" />
     <ClInclude Include="..\include\tinyfiledialogs.h" />
+    <ClInclude Include="..\src\dynamic_memory.h" />
     <ClInclude Include="..\src\game.h" />
-    <ClInclude Include="..\src\parallel_for.h" />
+    <ClInclude Include="..\src\memory_arena.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\dynamic_memory.c" />
     <ClCompile Include="..\src\game.c" />
+    <ClCompile Include="..\src\gol_threading.c" />
     <ClCompile Include="..\src\main.c" />
-    <ClCompile Include="..\src\parallel_for.c" />
+    <ClCompile Include="..\src\memory_arena.c" />
     <ClCompile Include="..\src\tinyfiledialogs.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

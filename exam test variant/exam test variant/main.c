@@ -1,7 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <Windows.h>
-#include <stdlib.h>
 
 int N1;
 int N2;
@@ -122,6 +121,45 @@ void deleteRow(int row)
 	N2 -= 1;
 }
 
+void addRow() {
+	if (N2 + 1 <= MAX_N2) {
+		for (int m = 0; m < M2; m++) {
+			A2[N2][m] = 0;
+		}
+		N2++;
+	}
+	else {
+		printf("Достигнут максимум строк!\n");
+	}
+}
+
+void insertRow(int row) {
+	if (N2 + 1 <= MAX_N2) {
+		for (int n = N2; n > row; n--) {
+			for (int m = 0; m < M2; m++) {
+				A2[n][m] = A2[n - 1][m];
+			}
+		}
+		for (int m = 0; m < M2; m++) {
+			A2[row][m] = 0;
+		}
+		N2++;
+	}
+	else {
+		printf("Достигнут максимум строк!\n");
+	}
+}
+
+void deleteColumn(int column)
+{
+	for (int n = 0; n < N2; n++) {
+		for (int m = column; m < M2 - 1; m++) {
+			A2[n][m] = A2[n][m + 1];
+		}
+	}
+	M2 -= 1;
+}
+
 void addColumn() {
 	if (M2 + 1 <= MAX_M2) {
 		for (int n = 0; n < N2; n++) {
@@ -151,28 +189,12 @@ void insertColumn(int column) {
 	}
 }
 
-void insertRow(int row) {
-	if (N2 + 1 <= MAX_N2) {
-		for (int n = N2; n > row; n--) {
-			for (int m = 0; m < M2; m++) {
-				A2[n][m] = A2[n - 1][m];
-			}
-		}
-		for (int m = 0; m < M2; m++) {
-			A2[row][m] = 0;
-		}
-		N2++;
-	}
-	else {
-		printf("Достигнут максимум строк!\n");
-	}
-}
-
 void task3() {
 	for (int n = 0; n < N2; n++) {
 		for (int m = 0; m < M2; m++) {
 			if (A2[n][m] < 0) {
 				deleteRow(n);
+				n--;
 				break;
 			}
 		}
@@ -185,7 +207,7 @@ int main()
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 
-	loadLists("test.txt");
+	loadLists("test1.txt");
 	printLists();
 
 	task2();

@@ -13,9 +13,9 @@
 #include "dynamic_memory.h"
 #include "memory_arena.h"
 
-#define MAP_X 1200
-#define MAP_Y 600
-#define CELL_SIZE 2
+#define MAP_X 100
+#define MAP_Y 100
+#define CELL_SIZE 10
 #define FCELL_SIZE (float)CELL_SIZE
 #define BOTTOM_BAR_HEIGHT 60
 
@@ -74,22 +74,24 @@ static inline single_gol(int x, int y)
 	}
 }
 
+
+
 int gol_thread(void* arg_ptr)
 {
 	golArgs args = *(golArgs*)(arg_ptr);
 
-	for (int x = args.startX; x < args.endX; x++) {
-		for (int y = args.startY; y < args.endY; y++) {
+	for (int x = args.startX + 1; x < args.endX - 1; x++) {
+		for (int y = args.startY + 1; y < args.endY - 1; y++) {
 			int neighbours = 0;
 
-			neighbours += checkCell(x - 1, y);
-			neighbours += checkCell(x - 1, y + 1);
-			neighbours += checkCell(x - 1, y - 1);
-			neighbours += checkCell(x + 1, y);
-			neighbours += checkCell(x + 1, y + 1);
-			neighbours += checkCell(x + 1, y - 1);
-			neighbours += checkCell(x, y + 1);
-			neighbours += checkCell(x, y - 1);
+			neighbours += map[x - 1][y];
+			neighbours += map[x - 1][y + 1];
+			neighbours += map[x - 1][y - 1];
+			neighbours += map[x + 1][y];
+			neighbours += map[x + 1][y + 1];
+			neighbours += map[x + 1][y - 1];
+			neighbours += map[x][y + 1];
+			neighbours += map[x][y - 1];
 
 			if (neighbours == 2) {
 				tempMap[x][y] = map[x][y];
@@ -104,10 +106,38 @@ int gol_thread(void* arg_ptr)
 		}
 	}
 
-	single_gol(args.startX, args.startY);
-	single_gol(args.startX, args.endY);
-	single_gol(args.endX, args.startY);
-	single_gol(args.endX, args.endY);
+	for (int x = args.startX; x < args.endX; x++) {
+		int neighbours = 0;
+
+		neighbours += map[x - 1][y];
+		neighbours += map[x - 1][y + 1];
+		neighbours += map[x - 1][y - 1];
+		neighbours += map[x + 1][y];
+		neighbours += map[x + 1][y + 1];
+		neighbours += map[x + 1][y - 1];
+		neighbours += map[x][y + 1];
+		neighbours += map[x][y - 1];
+
+		if (neighbours == 2) {
+			tempMap[x][y] = map[x][y];
+		}
+		else if (neighbours == 3) {
+			tempMap[x][y] = true;
+		}
+		else {
+			tempMap[x][y] = false;
+		}
+	}
+	for (int x = args.startX; x < args.endX; x++) {
+
+	}
+	for (int y = args.startY; y < args.endY; y++) {
+
+	}
+	for (int y = args.startY; y < args.endY; y++) {
+
+	}
+	
 
 	return 0;
 }

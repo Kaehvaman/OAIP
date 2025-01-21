@@ -57,18 +57,6 @@ void insert(int num, int index, int arr[], int* len) {
 	arr[index] = num;
 }
 
-void deletemax3(int arr[], int* len) {
-	int max = arr[0];
-	int maxi = 0;
-	for (int i = 1; i < *len; i++) {
-		if (arr[i] > max && arr[i] % 3 == 0) {
-			max = arr[i];
-			maxi = i;
-		}
-	}
-	deleteindex(maxi, arr, len);
-}
-
 exchange_max_chains(int A[], int B[], int* sA, int* sB) {
 	int a = A[0], sa = 1, ai = 0;
 	int b = B[0], sb = 1, bi = 0;
@@ -114,6 +102,18 @@ exchange_max_chains(int A[], int B[], int* sA, int* sB) {
 	printarr(A, *sA);
 	printf("B = ");
 	printarr(B, *sB);
+}
+
+void deletemax3(int arr[], int* len) {
+	int max = arr[0];
+	int maxi = 0;
+	for (int i = 1; i < *len; i++) {
+		if (arr[i] > max && arr[i] % 3 == 0) {
+			max = arr[i];
+			maxi = i;
+		}
+	}
+	deleteindex(maxi, arr, len);
 }
 
 //#define ARRLEN 10

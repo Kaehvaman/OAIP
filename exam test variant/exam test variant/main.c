@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <Windows.h>
 
+/*
+ * не забудь включить AddressSanitizer / санитайзер адресов
+ */
+
 int N1;
 int N2;
 int M2;
@@ -202,6 +206,51 @@ void task3() {
 	printf("> Выполнено задание 3\n");
 }
 
+int countRow(int* buf, int len, int target)
+{
+	int count = 0;
+	for (int i = 0; i < len; i++) {
+		if (buf[i] == target) {
+			count += 1;
+		}
+	}
+	return 0;
+}
+
+int countColumn(int num, int column)
+{
+	int count = 0;
+	for (int n = 0; n < N2; n++) {
+		if (A2[n][column] == num) {
+			count += 1;
+		}
+	}
+	return count;
+}
+
+// Удалить те столбцы в которых встречается хотя бы два одинаковых элемента
+void taskAnton()
+{
+	for (int m = 0; m < M2; m++) {
+		for (int n = 0; n < N2; n++) {
+			if (countColumn(A2[n][m], m) > 1) {
+				deleteColumn(m);
+				m -= 1;
+				break;
+			}
+		}
+	}
+	printf("> Выполнено задание Антона\n");
+}
+
+void print1D(int* buf, int len)
+{
+	for (int i = 0; i < len; i++) {
+		printf("%d ", buf[i]);
+	}
+	printf("\n");
+}
+
 int main()
 {
 	SetConsoleCP(1251);
@@ -209,13 +258,19 @@ int main()
 
 	loadLists("test1.txt");
 	printLists();
-
-	task2();
-	task3();
+	
+	//task2();
+	//task3();
+	taskAnton();
 
 	printLists();
+	//print1D(A2[1], M2);
 
 	saveLists("out.txt");
+
+	while (1) {
+
+	}
 
 	return 0;
 }
